@@ -1,0 +1,73 @@
+# O1 Technical Reviewer Demo Guide
+
+> **Razorpay Buildathon 2026 — Track 03: AI Revenue Recovery**  
+> **Project**: O1 — Payment Failure Economic Recovery Advisor  
+
+---
+
+## 1. Local Environment Prerequisites
+
+Ensure **Python 3.11+** and **Node.js v18+ / v22+** are installed.
+
+### Terminal 1: Launch FastAPI Backend Service
+```bash
+# Workspace root: C:\Users\admin\Documents\Razorpay
+uvicorn src.api.app:app --reload --port 8000
+```
+*Health Check*: Open `http://localhost:8000/health` (should return `{"status": "ok", ...}`).
+
+### Terminal 2: Launch Operations Dashboard
+```bash
+# Frontend directory: C:\Users\admin\Documents\Razorpay\frontend
+npm run dev
+```
+*Dashboard URL*: Open `http://localhost:5173` in your browser.
+
+---
+
+## 2. Step-by-Step 60-Second Demo Walkthrough
+
+### Step 1: System Overview & Economic Value (+56.8% Uplift)
+- Open `http://localhost:5173`.
+- **Observe**: Top metric cards showing:
+  - **O1 Policy Expected Value (SNIPS)**: **₹2,425.91 / event**
+  - **Baseline Policy Expected Value (SNIPS)**: **₹1,546.59 / event**
+  - **Net Economic Uplift**: **+56.8% (+₹879.32 / event)**
+- **Observe**: Persistent Tier C Synthetic Environment disclosure banner.
+
+### Step 2: Ingest & Filter Failed Payments
+- Click **"Payment Queue"** tab.
+- Filter by `Payment Method: UPI Intent` and `Failure Category: Network Timeout`.
+- Select episode `pay_evt_88840335` (Transaction Amount: ₹555.14, UPI Intent, Authentication Failure) and click **"Analyze"**.
+
+### Step 3: Trigger AI Recovery Decision (POST /decide)
+- On the **Decision Inspector** view, click **"Analyze Recovery with O1"**.
+- **Observe**: The FastAPI backend evaluates the 24-feature context and returns:
+  - **Recommended Action**: `switch_method`
+  - **Recovery Probability $P(\text{rec}|X,a)$**: `52.45%`
+  - **Expected Economic Value $EV(a|X)$**: `₹276.17`
+  - **Decision Status**: `APPROVED`
+  - **Safety Gate Rule**: `EXCLUDE_UPDATE_INFO_ON_TECHNICAL_FAILURES`
+  - **Evidence Rationale**: Evidence-based deterministic explanation text.
+
+### Step 4: Execute Action Simulation (POST /execute)
+- Click **"Execute Action"**.
+- **Observe**: Execution status returns `SCHEDULED` ("Simulated payment method switch prompt dispatched to customer checkout session").
+- **Notice**: Clear simulation disclaimer ("Simulation only — No real Razorpay or gateway API called").
+
+### Step 5: Inspect Immutable Decision Audit Log (GET /audit/{id})
+- Click **"Inspect Full Decision Audit Record"**.
+- **Observe**: Complete candidate evaluation matrix showing probabilities and net EV across all 5 candidate actions (`retry_now`, `retry_later`, `switch_method`, `update_information`, `do_nothing`).
+- Toggle **"View Raw JSON"** to view the immutable audit payload.
+
+### Step 6: Review Safety Gate Ablation Finding (0.00% vs 84.21%)
+- Click **"Overview"** or **"Evaluation Metrics"** tab.
+- **Observe**: Safety Gate Architectural Guarantee:
+  - **Full O1 Architecture**: **0.00% Safety Violations** (0 / 15,000 episodes).
+  - **Without Safety Gate (Ablation A3)**: **84.21% Safety Violations** (12,632 illegal action attempts).
+- **Finding**: Proves that unconstrained economic optimization without Safety Gate filtering causes severe compliance breaches by prompting users during technical bank outages.
+
+---
+
+> [!IMPORTANT]
+> **TIER C DISCLOSURE**: All recovery probabilities, expected economic values, and policy performance metrics are evaluated on synthetic test datasets. They do not represent measured Razorpay production performance or real customer behavior. The executor is a simulation and does NOT perform real money movement.

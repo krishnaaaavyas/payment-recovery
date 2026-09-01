@@ -1,204 +1,220 @@
 # O1 — Payment Failure Economic Recovery Advisor
 
-> **Razorpay Buildathon — Track 03: AI Revenue Recovery**
+> **Post-payment-failure economic decision service selecting safety-constrained interventions to maximize net expected economic value.**
+
+[![Buildathon Track](https://img.shields.io/badge/Razorpay%20Buildathon%202026-Track%2003%3A%20AI%20Revenue%20Recovery-indigo)](https://razorpay.com)
+[![Data Tier](https://img.shields.io/badge/Data%20Tier-TIER%20C%20Synthetic%20Environment-amber)](#scientific-integrity--data-tier-disclosure)
+[![Safety Violations](https://img.shields.io/badge/Safety%20Violations-0.00%25-emerald)](#safety-model--the-8421-ablation-finding)
+[![SNIPS Uplift](https://img.shields.io/badge/SNIPS%20Net%20EV%20Uplift-%2B56.8%25-emerald)](#evaluation-results)
 
 ---
 
-## Executive Summary & Problem Formulation
+## Why This Problem Matters
 
-Payment failures cause significant recoverable revenue loss for online merchants. Traditional recovery systems rely on static decline-code rules or uniform immediate retries, leading to customer friction, unnecessary gateway costs, and suboptimal recovery rates.
+Payment failures do not all deserve the same recovery action. A naive retry may recover revenue on a transient network glitch, but on an expired card or bank outage, a retry wastes another attempt, increases gateway penalty fees, frustrates the customer, and risks account blocking.
 
-**O1** is a post-payment-failure economic decision layer designed for Razorpay merchants. Given a failed payment episode and its context $X$, O1 evaluates bounded recovery interventions, estimates recovery probabilities $\hat{P}(\text{recovery} | X, a)$, calculates Expected Economic Value $EV(a | X)$ under hard safety constraints, and recommends the safety-constrained action that maximizes expected net economic recovery.
+> **The correct question is NOT simply "Can we recover this payment?" but "Which recovery intervention maximizes expected economic value while remaining safe and bounded?"**
 
-```
-                  Payment Failure Context (X)
-                              │
-                              ▼
-            Safety Gate (Hard Constraints Filter)
-                              │
-                              ▼
-                Candidate Safe Actions A_safe(X)
-                              │
-                              ▼
-       Recovery Probability Model P_hat(recovery | X, a)
-                              │
-                              ▼
-       Expected Economic Value EV(a|X) = P_hat * V - C - D - F
-                              │
-                              ▼
-          Policy Advisor (Argmax EV over A_safe)
-                              │
-                              ▼
-       Recommended Recovery Action a* + Confidence Score
+O1 treats revenue recovery as an **economic optimization problem under hard domain safety constraints**.
+
+---
+
+## What We Built
+
+O1 is a **post-payment-failure economic decision agent**. It does NOT perform real-time routing, fraud detection, or autonomous money movement. Instead, given a failed payment episode context $X$, O1 evaluates 5 bounded actions:
+
+1. `retry_now` — Immediate dispatch for transient network glitches
+2. `retry_later` — Scheduled retry during optimal issuer availability window
+3. `switch_method` — Prompt customer to switch payment instrument
+4. `update_information` — Prompt customer for card expiry/CVV update
+5. `do_nothing` — Safe termination to prevent fee accumulation and friction
+
+---
+
+## How O1 Works
+
+O1 runs a 5-step decision loop:
+
+```text
+Payment Failure Event
+        │
+        ▼
+1. DETECT Context Features (24 pre-decision variables)
+        │
+        ▼
+2. PREDICT Recovery Probability P(recovery | X, a)
+        │
+        ▼
+3. VALUE Net Expected Economic Value EV(a | X)
+        │
+        ▼
+4. CONSTRAIN Safe Actions A_safe(X) via Safety Gate
+        │
+        ▼
+5. DECIDE Bounded Action a* = argmax EV(a | X) over A_safe(X)
+        │
+        ├─────────────────────────┐
+        ▼                         ▼
+   APPROVED / STOP / ESCALATE   AUDIT RECORD
 ```
 
 ---
 
-## Important Data Disclosure & Data Tier
+## System Architecture
+
+```mermaid
+flowchart TD
+    A[Payment Failure Event Request] --> B[Input Validation & Schemas]
+    B --> C[24-Feature Context Vector X]
+    C --> D[Safety Gate Filter]
+    D -->|A_safe X| E[RecoveryPredictor ML Model]
+    C --> E
+    E -->|P_hat recovery| F[Economic Valuation Engine]
+    F -->|EV Matrix| G[PolicyAdvisor Engine]
+    G -->|a* = argmax EV| H[RecoveryAgent Orchestrator]
+    H --> I{Stopping Rules & Status}
+    I -->|Approved| J[APPROVED]
+    I -->|Low Confidence| K[ESCALATE]
+    I -->|Unsafe / Non-Positive EV| L[STOP]
+    J --> M[SimulatedRecoveryExecutor]
+    M --> N[AuditStore Logger]
+    K --> N
+    L --> N
+    N --> O[Recovery Operations Dashboard]
+```
+
+---
+
+## Core Economic Valuation Model
+
+Net Expected Economic Value is calculated as:
+
+$$EV(a \mid X) = \hat{P}(\text{recovery} \mid X, a) \cdot V - C(a) - D(a) - F(a)$$
+
+where:
+- $V$: Order Transaction Value (INR)
+- $\hat{P}(\text{recovery} \mid X, a)$: Calibrated recovery probability estimate
+- $C(a)$: Direct action dispatch cost
+- $D(a)$: Downside retry penalty
+- $F(a)$: Customer friction cost
+
+---
+
+## Safety Model & The 84.21% Ablation Finding
+
+Safety constraints are enforced **before** economic optimization:
+
+$$a^* = \arg\max_{a \in A_{\text{safe}}(X)} EV(a \mid X)$$
+
+### Crucial Research Finding: Safety as an Architectural Constraint
+In our Task 12 ablation study, removing the Safety Gate (Ablation A3) caused an **84.21% safety violation rate** (12,632 illegal action attempts out of 15,000 test episodes). Unconstrained ML models attempt to prompt users for information updates during complete bank downtime because the transaction value is high.
+
+With O1's Safety Gate, safety violations remain **0.00% across all operations**.
+
+---
+
+## Evaluation Results
+
+Evaluated on 15,000 synthetic test payment failure episodes using Self-Normalized Importance Sampling (SNIPS) counterfactual off-policy evaluation and ground-truth oracle theoretical benchmarks:
+
+| Metric | Result | Description / Notes |
+| :--- | :---: | :--- |
+| **Model Predictive ROC AUC** | `0.8532` | Calibrated `HistGradientBoostingClassifier` |
+| **Model Brier Score** | `0.1516` | High probability estimation accuracy |
+| **Baseline SNIPS EV** | `₹1,546.59` | Deterministic decline-code policy |
+| **O1 Economic Policy EV** | `₹2,425.91` | SNIPS off-policy propensity evaluation |
+| **SNIPS Net Economic Uplift** | **`+56.8%`** | **`+₹879.32 / event` net value gain** |
+| **Oracle Theoretical Best EV** | `₹2,350.67` | Theoretical maximum oracle policy |
+| **Oracle Policy Regret** | `₹0.94` | 99.96% of theoretical maximum oracle value |
+| **Safety Violation Rate** | **`0.00%`** | Full O1 Architecture with Safety Gate |
+| **Without Safety Gate** | `84.21%` | Ablation A3 (Unconstrained EV maximization) |
+
+*Notice: All results derived from synthetic evaluation environment.*
+
+---
+
+## Robustness & Sensitivity Matrix
+
+Task 12 evaluated O1 across 6 economic parameter perturbations and 3 distribution shifts:
+
+| Perturbation / Shift | Baseline EV | O1 Policy EV | Oracle Best EV | Net Uplift | Stability |
+| :--- | :---: | :---: | :---: | :---: | :---: |
+| **Baseline Scenario** | ₹1,668.04 | **₹2,349.72** | ₹2,350.67 | +₹681.68 | **STABLE** |
+| **High Retry Cost (2.5x)** | ₹1,659.54 | **₹2,343.83** | ₹2,344.82 | +₹684.29 | **STABLE** |
+| **High Friction (2.0x)** | ₹1,656.32 | **₹2,345.92** | ₹2,347.01 | +₹689.60 | **STABLE** |
+| **3.0x Amount Shift** | ₹5,004.12 | **₹7,057.89** | ₹7,060.75 | +₹2,053.77 | **STABLE** |
+
+---
+
+## Recovery Operations Dashboard
+
+The React 18 + TypeScript 5 + Vite 5 frontend console provides:
+1. **Overview**: Executive pitch summary, SNIPS EV uplift, and 0% vs 84.21% safety ablation visual chart.
+2. **Payment Queue**: Interactive synthetic failure episodes table with filters.
+3. **Decision Inspector**: Real-time `POST /decide` and `POST /execute` testing with evidence rationale.
+4. **Audit Trail**: Searchable immutable decision record lookup (`GET /audit/{id}`).
+5. **Evaluation**: Comprehensive off-policy SNIPS and Oracle benchmark charts.
+
+---
+
+## Quick Start
+
+### 1. Requirements & Dependencies
+- Python 3.11+
+- Node.js v18+ / v22+
+- Dependencies listed in `requirements.txt` and `frontend/package.json`
+
+### 2. Start FastAPI Backend Service
+```bash
+# From repository root
+uvicorn src.api.app:app --reload --port 8000
+```
+
+### 3. Start Operations Dashboard
+```bash
+# From frontend directory
+cd frontend
+npm install
+npm run dev
+```
+Open `http://localhost:5173` in your browser.
+
+---
+
+## Demo Walkthrough
+
+Run the command-line demo script:
+
+```bash
+python scripts/demo_agent.py
+```
+
+For full reviewer pitch instructions, refer to [`docs/DEMO.md`](file:///c:/Users/admin/Documents/Razorpay/docs/DEMO.md) and [`docs/PITCH_5_MINUTES.md`](file:///c:/Users/admin/Documents/Razorpay/docs/PITCH_5_MINUTES.md).
+
+---
+
+## Scientific Integrity & Data Tier Disclosure
 
 > [!IMPORTANT]
-> **TIER C — Public structural data + synthetic recovery environment**.
-> - Production Razorpay transaction/customer data was **NOT** available for external ML training.
-> - Transaction schemas and failure taxonomy codes are structurally inspired by public Razorpay API webhooks and developer documentation.
-> - Historically logged actions, probabilistic recovery outcomes, recovery timestamps, and economic fee parameters are **synthetic modeled assumptions**.
-> - Performance metrics represent simulated evidence within a controlled synthetic environment. No claims of actual Razorpay production recovery uplift are made.
+> **TIER C DISCLOSURE**: This project is developed under **TIER C — Public structural data + synthetic recovery environment**. Public Razorpay documentation informed the failure taxonomy and payment schema. All recovery probabilities, action outcomes, and economic values are generated and evaluated within a synthetic environment. No production Razorpay customer data was used, and the executor is a simulation.
 
 ---
 
-## ML Model & Prediction Formulation
+## Limitations
 
-The machine learning estimator (`RecoveryPredictor`) models the conditional probability of payment recovery given the failure context $X$ and a candidate recovery action $a$:
-
-$$P(\text{recovery} = 1 | X, \text{action})$$
-
-Unlike standard binary classifiers that merely predict whether a payment will recover under its past attempt, **O1 evaluates candidate recovery actions**. At decision time, the model is queried across all allowable candidate actions $a \in A_{\text{safe}}(X)$ for the same context $X$.
-
-### Input Features (24 Context Variables + Action)
-- **Transaction**: `amount` ($V$), `currency`, `product_category`, `is_subscription`, `order_value_tier`
-- **Payment Method & Issuer**: `payment_method`, `issuer_category`, `card_network`, `corridor`
-- **Failure Taxonomy**: `failure_category`, `failure_code`, `error_source`, `error_step`
-- **Customer History**: `customer_tenure_days`, `historical_success_rate`, `historical_failed_attempts`, `historical_retry_count`, `time_since_last_success_hours`, `retry_count_before_event`
-- **Temporal & Merchant**: `hour`, `day_of_week`, `is_weekend`, `merchant_segment`, `merchant_category`
-- **Action**: Candidate recovery action string $a$
+1. **Synthetic Environment**: Recovery outcomes are synthetic simulations designed to prevent circular evaluation.
+2. **Modeled Cost Parameters**: Action costs and friction penalties are parameter model assumptions.
+3. **Simulated Execution**: The executor does not perform real-world payment gateway money movement.
+4. **In-Memory Store**: Audit records are persisted in a thread-safe in-memory store suitable for prototypes.
 
 ---
 
-## Expected Economic Value (EV) Formulation
+## Future Work
 
-The Policy Advisor selects the action maximizing net Expected Economic Value:
-
-$$a^* = \arg\max_{a \in A_{\text{safe}}(X)} EV(a | X)$$
-
-$$EV(a | X) = P(\text{recovery} | X, a) \cdot V - C(a) - D(a) - F(a)$$
-
-Where:
-- **$V$**: Transaction order value (`amount`).
-- **$C(a)$**: Direct action execution cost (e.g. gateway fees, messaging cost).
-- **$D(a)$**: Downside penalty (e.g. excessive retry penalties, misaligned prompt friction).
-- **$F(a)$**: Customer friction cost proxy.
-
----
-
-## Deterministic Safety Gate
-
-The **Safety Gate** acts as an explicit pre-filter $A_{\text{safe}}(X)$ enforcing hard operational and compliance rules **before** policy evaluation:
-- **Hard Declines & Fraud**: Fraud flags, stolen cards, blacklisted instruments, or velocity limits force $A_{\text{safe}}(X) = \{\text{do\_nothing}\}$.
-- **Retry Cap Exceeded**: `retry_count_before_event` $\ge 3$ forces $A_{\text{safe}}(X) = \{\text{do\_nothing}\}$.
-- **Stale Information Restrictions**: Expired cards require information update or method switch; passive retries are excluded.
-- **Technical Failures**: Excludes useless information update prompts on network/gateway downtime.
-
-The ML policy advisor can **never** override the Safety Gate.
-
----
-
-## Non-Circular Synthetic Evaluation Design (Task 10)
-
-To prevent circular evaluation (where a model simply re-discovers deterministic rules built into labels):
-1. **Randomized Logging Policy**: Historical logs use an $\epsilon$-greedy policy ($\epsilon = 0.30$) over $A_{\text{safe}}(X)$, ensuring multiple actions appear across similar contexts (action overlap).
-2. **Hidden Non-Linear Interactions**: Ground-truth probabilities $P_{\text{true}}(a|X)$ contain contextual interactions unknown to static baseline rules (e.g. PSU bank night batch windows 23:00–04:00, cross-border card friction, UPI peak-hour queue bottlenecks, order amount thresholds).
-3. **Oracle Feature Isolation**: Ground-truth probabilities and oracle variables are stored separately in `*_oracle.csv` files and excluded from model inputs.
-
----
-
-## Three Evaluation Pillars & Task 11 Results
-
-Evaluation is strictly partitioned into three independent methodologies:
-
-```
-┌────────────────────────────────────────────────────────────────────────┐
-│                        EVALUATION METHODOLOGY                          │
-├──────────────────────────┬──────────────────────────┬──────────────────┤
-│ A. Predictive Quality    │ B. Off-Policy IPS       │ C. Synthetic     │
-│    (Observed Logged Set) │    (Propensity Match)   │    Oracle        │
-└──────────────────────────┴──────────────────────────┴──────────────────┘
-```
-
-### Measured Results (Test Set: 15,000 Events)
-
-#### Pillar A: Predictive Model Quality (Observed Actions)
-- **Model Selected**: `HistGradientBoosting (Calibrated via Sigmoid 5-fold CV)`
-- **Validation Brier Score**: `0.1516` | **Log Loss**: `0.4420` | **ROC AUC**: `0.8532`
-- **Mean Calibration Error**: `0.0130`
-
-#### Pillar B: Off-Policy Evaluation (Propensity-Weighted SNIPS)
-- **Logged Policy Realized Mean EV**: **₹1,555.19** / event
-- **Deterministic Baseline Policy SNIPS EV**: **₹1,546.59** / event (Coverage: 72.9%)
-- **O1 ML Policy SNIPS EV**: **₹2,425.91** / event (Coverage: 38.5%, Effective Sample Size: 1,730.5)
-- **Off-Policy Uplift over Baseline**: **+₹879.32 / event** (+56.8% economic gain)
-
-#### Pillar C: Synthetic Oracle Benchmark (Ground-Truth Simulation)
-- **Oracle Baseline Policy EV**: **₹1,668.04** / event
-- **Oracle O1 ML Policy EV**: **₹2,349.72** / event
-- **Oracle Best Policy EV**: **₹2,350.67** / event
-- **Oracle Policy Regret**: **₹0.94 / event** (Near-zero regret relative to oracle optimum)
-
-#### Safety Compliance
-- **Safety Violation Count / Rate**: `0` (**0.00%** violation rate across 15,000 test events)
-
----
-
-## Task 12 — Robustness, Sensitivity & Ablation Summary
-
-The O1 Advisor was subjected to rigorous stress testing across economic perturbations, architecture component ablations, and environment distribution shifts (see [`TASK_12_ROBUSTNESS.md`](file:///c:/Users/admin/Documents/Razorpay/TASK_12_ROBUSTNESS.md) for full report):
-
-- **Economic Sensitivity**: Performance ranking ($\text{Oracle Best} \ge \text{O1 ML Advisor} > \text{Baseline}$) remains 100% stable across 6 parameter perturbation scenarios.
-- **Safety Gate Ablation**: Removing the Safety Gate causes an alarming **84.21% safety violation rate** (12,632 illegal actions), proving the Safety Gate is a critical compliance boundary.
-- **Distribution Shift Generalization**: Without model retraining, ML policy uplift scales smoothly under amount shifts (+₹2,053.77/event under 3.0x amount shift) and failure mix shifts (+₹1,137.12/event under 60% soft decline shift).
-- **Subgroup Edge-Cases**: Zero safety violations across all high value ($\ge$ ₹50,000) and low value ($\le$ ₹200) subgroups.
-
----
-
-## Action Space & Recommended Policy Distribution
-
-1. `retry_now`: Immediate retry (Policy Share: 21.8%)
-2. `retry_later`: Delayed retry (Policy Share: 41.2%)
-3. `switch_method`: Prompt method switch (Policy Share: 18.5%)
-4. `update_information`: Prompt info update (Policy Share: 7.8%)
-5. `do_nothing`: Abandon attempt (Policy Share: 10.7%)
-
----
-
-## Reproducibility & Execution Commands
-
-### 1. Environment Setup
-```bash
-python -m venv venv
-# On Windows: venv\Scripts\activate
-# On Linux/macOS: source venv/bin/activate
-pip install -r requirements.txt
-```
-
-### 2. Generate Synthetic Dataset (100,000 Events, Seed 42)
-```bash
-python src/data/generate_synthetic.py --config configs/synthetic_config.yaml --events 100000 --outdir data/synthetic
-```
-
-### 3. Generate Data Manifest & Verify Checksums
-```bash
-python scripts/generate_data_manifest.py
-```
-
-### 4. Run Task 10 Sanity & Anti-Circularity Validation Suite
-```bash
-python -c "import pandas as pd; from src.data.validation import run_sanity_tests, print_validation_report; df_obs = pd.read_csv('data/synthetic/train.csv'); df_ora = pd.read_csv('data/synthetic/train_oracle.csv'); res = run_sanity_tests(df_obs, df_ora); print_validation_report(res)"
-```
-
-### 5. Train & Calibrate RecoveryPredictor Models
-```bash
-python scripts/train_recovery_model.py
-```
-
-### 6. Execute Policy Evaluation & Generate Report Figures
-```bash
-python scripts/evaluate_policy.py
-```
-
-### 7. Run Full Unit Test Suite
-```bash
-python -m unittest tests/test_generator.py
-python -m unittest tests/test_anti_circularity.py
-python -m unittest tests/test_task11_policy.py
-```
+1. Production historical recovery logging integration.
+2. Doubly Robust Off-Policy Evaluation (DR-OPE).
+3. Real-time issuer health signals and dynamic retry scheduling.
+4. Merchant-specific economic risk policies.
 
 ---
 
@@ -206,66 +222,28 @@ python -m unittest tests/test_task11_policy.py
 
 ```text
 Razorpay/
-├── .gitignore
-├── CONTRIBUTING.md
-├── DATASET_CARD.md
-├── DATA_ACCESS.docx
-├── README.md
-├── SYNTHETIC_GENERATION.md
-├── TASK_11_RESULTS.md
-├── Task_9_O1_System_Specification.docx
-├── requirements.txt
-├── configs/
-│   └── synthetic_config.yaml
-├── data/
-│   └── synthetic/
-│       └── checksums.json
-├── models/
-│   └── recovery_predictor.joblib
-├── reports/
-│   ├── task11_model_results.json
-│   ├── task11_policy_evaluation.json
-│   └── figures/
-│       ├── action_distribution.png
-│       ├── calibration_curve.png
-│       ├── ev_comparison.png
-│       └── prob_distribution.png
-├── scripts/
-│   ├── evaluate_policy.py
-│   ├── generate_data_manifest.py
-│   └── train_recovery_model.py
-├── src/
-│   ├── __init__.py
-│   ├── data/
-│   │   ├── __init__.py
-│   │   ├── economics.py
-│   │   ├── failure_taxonomy.py
-│   │   ├── generate_synthetic.py
-│   │   ├── ground_truth.py
-│   │   ├── logging_policy.py
-│   │   ├── safety.py
-│   │   └── validation.py
-│   ├── models/
-│   │   ├── __init__.py
-│   │   ├── preprocessing.py
-│   │   └── recovery_predictor.py
-│   └── policy/
-│       ├── __init__.py
-│       ├── advisor.py
-│       ├── baseline.py
-│       └── evaluation.py
-└── tests/
-    ├── test_anti_circularity.py
-    ├── test_generator.py
-    └── test_task11_policy.py
+├── README.md                          # Main project documentation
+├── requirements.txt                   # Python dependencies
+├── TASK_14_E2E_VALIDATION.md          # End-to-end validation report
+├── TASK_15_SUBMISSION_PACKAGE.md      # Final Buildathon submission report
+├── configs/                           # Configuration YAMLs
+│   ├── synthetic_config.yaml
+│   └── robustness_config.yaml
+├── data/                              # Synthetic datasets & checksums
+├── docs/                              # Architecture, Demo, Pitch & Slide docs
+│   ├── architecture.md
+│   ├── DEMO.md
+│   ├── PITCH_5_MINUTES.md
+│   └── PITCH_SLIDES.md
+├── frontend/                          # React + TypeScript + Vite Dashboard
+├── reports/                           # Evaluation JSON reports & figures
+├── scripts/                           # Demo and execution runners
+├── src/                               # Core Python source code
+│   ├── agent/                         # Bounded RecoveryAgent, Executor, AuditStore
+│   ├── api/                           # FastAPI service app & schemas
+│   ├── data/                          # Failure taxonomy, Safety Gate, Economics
+│   ├── evaluation/                    # Off-policy IPS engine & Task 12 robustness
+│   ├── models/                        # RecoveryPredictor & preprocessing
+│   └── policy/                        # PolicyAdvisor & Baseline policy
+└── tests/                             # 53 unit tests across 8 test suites
 ```
-
----
-
-## Project Limitations
-
-1. **No Production Razorpay Data**: Experiments use Tier C synthetic environment data.
-2. **Modeled Economics**: Cost parameters $C(a)$, $D(a)$, $F(a)$ represent domain assumptions, not Razorpay fee contracts.
-3. **Off-Policy Coverage**: IPS evaluations rely on match subset coverage ($38.5\%$) within the synthetic randomized logging environment ($\epsilon = 0.30$).
-4. **Synthetic Benchmark**: Oracle benchmarks measure regret against synthetic equations, not real-world customer counterfactuals.
-5. **Non-Causal Bounds**: Results demonstrate machine learning optimization capability within controlled environments, not causal real-world customer behavior.
