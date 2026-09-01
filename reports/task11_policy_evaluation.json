@@ -1,0 +1,43 @@
+{
+  "test_events_count": 15000,
+  "safety_evaluation": {
+    "safety_violations_count": 0,
+    "safety_violation_rate": 0.0
+  },
+  "predictive_expected_metrics": {
+    "mean_expected_recovery_probability": 0.5909,
+    "mean_expected_ev_inr": 2287.69,
+    "expected_recovered_gmv_inr": 2301.99
+  },
+  "off_policy_ips_evaluation": {
+    "logged_policy_realized_mean_ev_inr": 1555.19,
+    "baseline_policy_ips_ev_inr": 1549.81,
+    "baseline_policy_snips_ev_inr": 1546.59,
+    "baseline_policy_coverage_rate": 0.729,
+    "ml_policy_ips_ev_inr": 2368.83,
+    "ml_policy_snips_ev_inr": 2425.91,
+    "ml_policy_coverage_rate": 0.3847,
+    "ml_effective_sample_size": 1730.5
+  },
+  "synthetic_oracle_benchmark": {
+    "disclaimer": "Synthetic oracle benchmark \u2014 not production evidence.",
+    "oracle_baseline_policy_ev_inr": 1668.04,
+    "oracle_ml_policy_ev_inr": 2349.72,
+    "oracle_best_policy_ev_inr": 2350.67,
+    "oracle_policy_regret_inr": 0.94
+  },
+  "distributions": {
+    "ml_action_distribution": {
+      "switch_method": 0.6945,
+      "do_nothing": 0.1541,
+      "update_information": 0.1421,
+      "retry_later": 0.0089,
+      "retry_now": 0.0003
+    },
+    "confidence_distribution": {
+      "high": 0.8127,
+      "medium": 0.1543,
+      "low": 0.033
+    }
+  }
+}

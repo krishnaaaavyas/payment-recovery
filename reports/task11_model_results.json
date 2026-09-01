@@ -1,0 +1,47 @@
+{
+  "selected_model": "hist_gb_calibrated",
+  "validation_metrics": {
+    "roc_auc": 0.8532,
+    "log_loss": 0.442,
+    "brier_score": 0.1516,
+    "mean_calibration_error": 0.013
+  },
+  "all_candidate_metrics": {
+    "logistic_regression_uncalibrated": {
+      "roc_auc": 0.8383,
+      "log_loss": 0.457,
+      "brier_score": 0.1583,
+      "mean_calibration_error": 0.0098
+    },
+    "logistic_regression_calibrated": {
+      "roc_auc": 0.8383,
+      "log_loss": 0.457,
+      "brier_score": 0.1583,
+      "mean_calibration_error": 0.0099
+    },
+    "random_forest_uncalibrated": {
+      "roc_auc": 0.84,
+      "log_loss": 0.4756,
+      "brier_score": 0.1616,
+      "mean_calibration_error": 0.0727
+    },
+    "random_forest_calibrated": {
+      "roc_auc": 0.8403,
+      "log_loss": 0.4693,
+      "brier_score": 0.1601,
+      "mean_calibration_error": 0.0459
+    },
+    "hist_gb_uncalibrated": {
+      "roc_auc": 0.8519,
+      "log_loss": 0.4441,
+      "brier_score": 0.1524,
+      "mean_calibration_error": 0.0206
+    },
+    "hist_gb_calibrated": {
+      "roc_auc": 0.8532,
+      "log_loss": 0.442,
+      "brier_score": 0.1516,
+      "mean_calibration_error": 0.013
+    }
+  }
+}

@@ -1,0 +1,27 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+
+# Data files (large CSVs excluded from git; verifiable via checksums.json)
+data/synthetic/*.csv
+
+# Serialized Model binaries
+models/*.joblib
+
+# Logs and environment files
+*.log
+task-*.log
+.env
+.env.*
+
+# IDE & OS temporary files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Scratch & Task logs
+scratch/
+.system_generated/

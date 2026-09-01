@@ -1,0 +1,60 @@
+# Configuration for Synthetic Payment Failure Event Dataset Generation
+# Razorpay Track 03 — AI Revenue Recovery (O1 Advisor)
+
+seed: 42
+num_events: 100000
+test_num_events: 5000
+
+temporal:
+  start_date: "2026-06-01"
+  end_date: "2026-08-31"
+  recovery_window_hours: 72
+
+splits:
+  train: 0.70
+  val: 0.15
+  test: 0.15
+
+actions:
+  - retry_now
+  - retry_later
+  - switch_method
+  - update_information
+  - do_nothing
+
+economics:
+  direct_costs:
+    retry_now: 2.00
+    retry_later: 3.00
+    switch_method: 5.00
+    update_information: 7.00
+    do_nothing: 0.00
+  
+  downside_penalties:
+    retry_excessive: 15.00  # applied when retry_count_before_event >= 2 and action in [retry_now, retry_later]
+    misaligned_action: 5.00 # applied when requesting info update on technical failure
+  
+  friction_costs:
+    retry_now: 1.00
+    retry_later: 2.00
+    switch_method: 10.00
+    update_information: 20.00
+    do_nothing: 0.00
+
+logging_policy:
+  epsilon: 0.30  # 30% uniform random over safe actions, 70% historical heuristic
+
+failure_categories:
+  - hard_decline
+  - soft_decline
+  - insufficient_funds
+  - expired_card
+  - invalid_information
+  - issuer_unavailable
+  - network_timeout
+  - authentication_failure
+  - velocity_limit
+  - blocked_instrument
+  - upi_timeout
+  - upi_decline
+  - bank_unavailable

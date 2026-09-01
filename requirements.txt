@@ -1,0 +1,10 @@
+# Core Runtime Dependencies for O1 Payment Failure Economic Recovery Advisor
+# Razorpay Track 03 — AI Revenue Recovery
+
+numpy>=1.24.0
+pandas>=2.0.0
+scikit-learn>=1.3.0
+scipy>=1.10.0
+PyYAML>=6.0
+matplotlib>=3.7.0
+joblib>=1.3.0
