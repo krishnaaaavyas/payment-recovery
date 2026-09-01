@@ -1,0 +1,57 @@
+# Configuration for Task 12 Robustness, Sensitivity, Ablation, and Stress Testing
+# Razorpay Track 03 — AI Revenue Recovery (O1 Advisor)
+
+seed: 42
+bootstrap_resamples: 1000
+
+economic_sensitivity:
+  BASELINE:
+    value_multiplier: 1.0
+    cost_multiplier: 1.0
+    friction_multiplier: 1.0
+    downside_multiplier: 1.0
+  LOW_VALUE:
+    value_multiplier: 0.5
+    cost_multiplier: 1.0
+    friction_multiplier: 1.0
+    downside_multiplier: 1.0
+  HIGH_VALUE:
+    value_multiplier: 2.0
+    cost_multiplier: 1.0
+    friction_multiplier: 1.0
+    downside_multiplier: 1.0
+  HIGH_RETRY_COST:
+    value_multiplier: 1.0
+    cost_multiplier: 2.0
+    friction_multiplier: 1.0
+    downside_multiplier: 1.0
+  HIGH_FRICTION:
+    value_multiplier: 1.0
+    cost_multiplier: 1.0
+    friction_multiplier: 2.0
+    downside_multiplier: 1.0
+  HIGH_DOWNSIDE:
+    value_multiplier: 1.0
+    cost_multiplier: 1.0
+    friction_multiplier: 1.0
+    downside_multiplier: 2.0
+
+ground_truth_robustness:
+  STANDARD:
+    interaction_scale: 1.0
+  WEAKER_CONTEXTUAL_INTERACTIONS:
+    interaction_scale: 0.5
+  STRONGER_CONTEXTUAL_INTERACTIONS:
+    interaction_scale: 1.5
+
+distribution_shifts:
+  SHIFT_TRANSACTION_VALUE:
+    amount_multiplier: 3.0
+  SHIFT_FAILURE_MIX:
+    soft_decline_weight: 0.60
+  SHIFT_PAYMENT_METHOD_MIX:
+    upi_weight: 0.70
+  SHIFT_COMBINED:
+    amount_multiplier: 2.5
+    soft_decline_weight: 0.50
+    upi_weight: 0.60

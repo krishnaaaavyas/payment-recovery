@@ -1,0 +1,657 @@
+{
+  "economic_sensitivity": {
+    "BASELINE": {
+      "parameters": {
+        "value_multiplier": 1.0,
+        "cost_multiplier": 1.0,
+        "friction_multiplier": 1.0,
+        "downside_multiplier": 1.0
+      },
+      "ml_policy_ev_ci": {
+        "mean": 2349.89,
+        "median": 915.93,
+        "std": 5205.88,
+        "ci_lower": 2270.33,
+        "ci_upper": 2424.02
+      },
+      "baseline_policy_ev_ci": {
+        "mean": 1669.04,
+        "median": 658.78,
+        "std": 3566.76,
+        "ci_lower": 1616.32,
+        "ci_upper": 1721.77
+      },
+      "oracle_best_ev_ci": {
+        "mean": 2350.91,
+        "median": 916.63,
+        "std": 5206.6,
+        "ci_lower": 2272.19,
+        "ci_upper": 2425.77
+      },
+      "uplift_ci": {
+        "mean": 680.31,
+        "median": 83.31,
+        "std": 2578.74,
+        "ci_lower": 637.91,
+        "ci_upper": 723.57
+      },
+      "regret_ci": {
+        "mean": 1.56,
+        "median": 0.0,
+        "std": 24.15,
+        "ci_lower": 1.26,
+        "ci_upper": 2.04
+      },
+      "safety_violations": 0,
+      "ranking_stable": false,
+      "action_distribution": {
+        "switch_method": 0.6945333333333333,
+        "do_nothing": 0.15406666666666666,
+        "update_information": 0.14213333333333333,
+        "retry_later": 0.008933333333333333,
+        "retry_now": 0.0003333333333333333
+      }
+    },
+    "LOW_VALUE": {
+      "parameters": {
+        "value_multiplier": 0.5,
+        "cost_multiplier": 1.0,
+        "friction_multiplier": 1.0,
+        "downside_multiplier": 1.0
+      },
+      "ml_policy_ev_ci": {
+        "mean": 1167.79,
+        "median": 449.31,
+        "std": 2602.23,
+        "ci_lower": 1127.99,
+        "ci_upper": 1204.84
+      },
+      "baseline_policy_ev_ci": {
+        "mean": 830.5,
+        "median": 325.03,
+        "std": 1782.5,
+        "ci_lower": 804.16,
+        "ci_upper": 856.86
+      },
+      "oracle_best_ev_ci": {
+        "mean": 1168.47,
+        "median": 450.39,
+        "std": 2602.58,
+        "ci_lower": 1129.14,
+        "ci_upper": 1205.88
+      },
+      "uplift_ci": {
+        "mean": 337.02,
+        "median": 37.19,
+        "std": 1288.92,
+        "ci_lower": 315.85,
+        "ci_upper": 358.67
+      },
+      "regret_ci": {
+        "mean": 0.95,
+        "median": 0.0,
+        "std": 13.35,
+        "ci_lower": 0.76,
+        "ci_upper": 1.19
+      },
+      "safety_violations": 0,
+      "ranking_stable": false,
+      "action_distribution": {
+        "switch_method": 0.6739333333333334,
+        "do_nothing": 0.15446666666666667,
+        "update_information": 0.14013333333333333,
+        "retry_later": 0.0298,
+        "retry_now": 0.0016666666666666668
+      }
+    },
+    "HIGH_VALUE": {
+      "parameters": {
+        "value_multiplier": 2.0,
+        "cost_multiplier": 1.0,
+        "friction_multiplier": 1.0,
+        "downside_multiplier": 1.0
+      },
+      "ml_policy_ev_ci": {
+        "mean": 4714.13,
+        "median": 1848.68,
+        "std": 10413.14,
+        "ci_lower": 4554.95,
+        "ci_upper": 4862.41
+      },
+      "baseline_policy_ev_ci": {
+        "mean": 3346.12,
+        "median": 1326.68,
+        "std": 7135.3,
+        "ci_lower": 3240.65,
+        "ci_upper": 3451.59
+      },
+      "oracle_best_ev_ci": {
+        "mean": 4716.01,
+        "median": 1850.31,
+        "std": 10414.57,
+        "ci_lower": 4558.52,
+        "ci_upper": 4865.76
+      },
+      "uplift_ci": {
+        "mean": 1366.94,
+        "median": 175.14,
+        "std": 5158.4,
+        "ci_lower": 1282.16,
+        "ci_upper": 1453.47
+      },
+      "regret_ci": {
+        "mean": 2.96,
+        "median": 0.0,
+        "std": 47.73,
+        "ci_lower": 2.37,
+        "ci_upper": 3.88
+      },
+      "safety_violations": 0,
+      "ranking_stable": false,
+      "action_distribution": {
+        "switch_method": 0.7011333333333334,
+        "do_nothing": 0.15406666666666666,
+        "update_information": 0.1426,
+        "retry_later": 0.0021333333333333334,
+        "retry_now": 6.666666666666667e-05
+      }
+    },
+    "HIGH_RETRY_COST": {
+      "parameters": {
+        "value_multiplier": 1.0,
+        "cost_multiplier": 2.0,
+        "friction_multiplier": 1.0,
+        "downside_multiplier": 1.0
+      },
+      "ml_policy_ev_ci": {
+        "mean": 2345.39,
+        "median": 910.93,
+        "std": 5205.48,
+        "ci_lower": 2265.86,
+        "ci_upper": 2419.52
+      },
+      "baseline_policy_ev_ci": {
+        "mean": 1666.24,
+        "median": 655.12,
+        "std": 3566.26,
+        "ci_lower": 1613.53,
+        "ci_upper": 1718.97
+      },
+      "oracle_best_ev_ci": {
+        "mean": 2346.45,
+        "median": 911.63,
+        "std": 5206.19,
+        "ci_lower": 2267.75,
+        "ci_upper": 2421.31
+      },
+      "uplift_ci": {
+        "mean": 678.62,
+        "median": 80.66,
+        "std": 2578.46,
+        "ci_lower": 636.23,
+        "ci_upper": 721.89
+      },
+      "regret_ci": {
+        "mean": 1.6,
+        "median": 0.0,
+        "std": 24.24,
+        "ci_lower": 1.3,
+        "ci_upper": 2.08
+      },
+      "safety_violations": 0,
+      "ranking_stable": false,
+      "action_distribution": {
+        "switch_method": 0.6913333333333334,
+        "do_nothing": 0.15413333333333334,
+        "update_information": 0.14173333333333332,
+        "retry_later": 0.0122,
+        "retry_now": 0.0006
+      }
+    },
+    "HIGH_FRICTION": {
+      "parameters": {
+        "value_multiplier": 1.0,
+        "cost_multiplier": 1.0,
+        "friction_multiplier": 2.0,
+        "downside_multiplier": 1.0
+      },
+      "ml_policy_ev_ci": {
+        "mean": 2340.06,
+        "median": 903.87,
+        "std": 5204.89,
+        "ci_lower": 2260.48,
+        "ci_upper": 2414.17
+      },
+      "baseline_policy_ev_ci": {
+        "mean": 1664.84,
+        "median": 653.72,
+        "std": 3565.38,
+        "ci_lower": 1612.14,
+        "ci_upper": 1717.59
+      },
+      "oracle_best_ev_ci": {
+        "mean": 2341.35,
+        "median": 905.93,
+        "std": 5205.58,
+        "ci_lower": 2262.67,
+        "ci_upper": 2416.18
+      },
+      "uplift_ci": {
+        "mean": 674.68,
+        "median": 74.74,
+        "std": 2577.94,
+        "ci_lower": 632.3,
+        "ci_upper": 718.02
+      },
+      "regret_ci": {
+        "mean": 1.83,
+        "median": 0.0,
+        "std": 26.33,
+        "ci_lower": 1.47,
+        "ci_upper": 2.31
+      },
+      "safety_violations": 0,
+      "ranking_stable": false,
+      "action_distribution": {
+        "switch_method": 0.6792,
+        "do_nothing": 0.15413333333333334,
+        "update_information": 0.14073333333333332,
+        "retry_later": 0.025066666666666668,
+        "retry_now": 0.0008666666666666666
+      }
+    },
+    "HIGH_DOWNSIDE": {
+      "parameters": {
+        "value_multiplier": 1.0,
+        "cost_multiplier": 1.0,
+        "friction_multiplier": 1.0,
+        "downside_multiplier": 2.0
+      },
+      "ml_policy_ev_ci": {
+        "mean": 2349.89,
+        "median": 915.93,
+        "std": 5205.88,
+        "ci_lower": 2270.33,
+        "ci_upper": 2424.02
+      },
+      "baseline_policy_ev_ci": {
+        "mean": 1668.01,
+        "median": 658.23,
+        "std": 3566.88,
+        "ci_lower": 1615.29,
+        "ci_upper": 1720.71
+      },
+      "oracle_best_ev_ci": {
+        "mean": 2350.91,
+        "median": 916.63,
+        "std": 5206.6,
+        "ci_lower": 2272.19,
+        "ci_upper": 2425.77
+      },
+      "uplift_ci": {
+        "mean": 681.34,
+        "median": 85.04,
+        "std": 2578.91,
+        "ci_lower": 638.92,
+        "ci_upper": 724.57
+      },
+      "regret_ci": {
+        "mean": 1.56,
+        "median": 0.0,
+        "std": 24.15,
+        "ci_lower": 1.26,
+        "ci_upper": 2.04
+      },
+      "safety_violations": 0,
+      "ranking_stable": false,
+      "action_distribution": {
+        "switch_method": 0.6945333333333333,
+        "do_nothing": 0.15406666666666666,
+        "update_information": 0.14213333333333333,
+        "retry_later": 0.008933333333333333,
+        "retry_now": 0.0003333333333333333
+      }
+    }
+  },
+  "ablation_study": {
+    "A0_Rule_Baseline": {
+      "mean_oracle_ev_inr": 1668.91,
+      "ev_bootstrap_ci": {
+        "mean": 1668.91,
+        "median": 658.72,
+        "std": 3566.78,
+        "ci_lower": 1616.19,
+        "ci_upper": 1721.64
+      },
+      "safety_violations_count": 0,
+      "safety_violation_rate": 0.0,
+      "action_distribution": {
+        "retry_now": 0.38893333333333335,
+        "retry_later": 0.2739333333333333,
+        "do_nothing": 0.15406666666666666,
+        "update_information": 0.14326666666666665,
+        "switch_method": 0.0398
+      }
+    },
+    "A1_Predictive_Model_Only": {
+      "mean_oracle_ev_inr": 2349.03,
+      "ev_bootstrap_ci": {
+        "mean": 2349.03,
+        "median": 915.85,
+        "std": 5205.2,
+        "ci_lower": 2270.21,
+        "ci_upper": 2424.05
+      },
+      "safety_violations_count": 0,
+      "safety_violation_rate": 0.0,
+      "action_distribution": {
+        "switch_method": 0.7029333333333333,
+        "do_nothing": 0.15406666666666666,
+        "update_information": 0.14273333333333332,
+        "retry_later": 0.0002666666666666667
+      }
+    },
+    "A2_ML_Economic_Optimization": {
+      "mean_oracle_ev_inr": 2349.06,
+      "ev_bootstrap_ci": {
+        "mean": 2349.06,
+        "median": 915.85,
+        "std": 5205.19,
+        "ci_lower": 2270.23,
+        "ci_upper": 2424.08
+      },
+      "safety_violations_count": 0,
+      "safety_violation_rate": 0.0,
+      "action_distribution": {
+        "switch_method": 0.6945333333333333,
+        "do_nothing": 0.15406666666666666,
+        "update_information": 0.14213333333333333,
+        "retry_later": 0.008933333333333333,
+        "retry_now": 0.0003333333333333333
+      }
+    },
+    "A3_ML_Economic_No_Safety_Gate": {
+      "mean_oracle_ev_inr": 2984.68,
+      "ev_bootstrap_ci": {
+        "mean": 2984.68,
+        "median": 1285.94,
+        "std": 5299.16,
+        "ci_lower": 2785.52,
+        "ci_upper": 3196.02
+      },
+      "safety_violations_count": 12632,
+      "safety_violation_rate": 0.8421,
+      "action_distribution": {
+        "update_information": 0.9798,
+        "switch_method": 0.012466666666666666,
+        "retry_later": 0.007266666666666667,
+        "retry_now": 0.00046666666666666666
+      }
+    },
+    "A4_Full_Architecture": {
+      "mean_oracle_ev_inr": 2349.06,
+      "ev_bootstrap_ci": {
+        "mean": 2349.06,
+        "median": 915.85,
+        "std": 5205.19,
+        "ci_lower": 2270.23,
+        "ci_upper": 2424.08
+      },
+      "safety_violations_count": 0,
+      "safety_violation_rate": 0.0,
+      "action_distribution": {
+        "switch_method": 0.6945333333333333,
+        "do_nothing": 0.15406666666666666,
+        "update_information": 0.14213333333333333,
+        "retry_later": 0.008933333333333333,
+        "retry_now": 0.0003333333333333333
+      }
+    }
+  },
+  "distribution_shifts": {
+    "SHIFT_TRANSACTION_VALUE": {
+      "parameters": {
+        "amount_multiplier": 3.0
+      },
+      "ml_policy_ev_ci": {
+        "mean": 7078.57,
+        "median": 2782.15,
+        "std": 15620.37,
+        "ci_lower": 6840.53,
+        "ci_upper": 7301.28
+      },
+      "baseline_policy_ev_ci": {
+        "mean": 5023.19,
+        "median": 1995.43,
+        "std": 10703.84,
+        "ci_lower": 4864.98,
+        "ci_upper": 5181.41
+      },
+      "oracle_best_ev_ci": {
+        "mean": 7081.14,
+        "median": 2785.91,
+        "std": 15622.53,
+        "ci_lower": 6844.88,
+        "ci_upper": 7305.78
+      },
+      "uplift_ci": {
+        "mean": 2053.77,
+        "median": 267.69,
+        "std": 7737.87,
+        "ci_lower": 1926.3,
+        "ci_upper": 2183.18
+      },
+      "regret_ci": {
+        "mean": 4.18,
+        "median": 0.0,
+        "std": 61.65,
+        "ci_lower": 3.32,
+        "ci_upper": 5.39
+      },
+      "safety_violations": 0,
+      "action_distribution": {
+        "switch_method": 0.7017333333333333,
+        "do_nothing": 0.15406666666666666,
+        "update_information": 0.1428,
+        "retry_later": 0.0014
+      }
+    },
+    "SHIFT_FAILURE_MIX": {
+      "parameters": {
+        "soft_decline_weight": 0.6
+      },
+      "ml_policy_ev_ci": {
+        "mean": 2349.65,
+        "median": 915.98,
+        "std": 5205.8,
+        "ci_lower": 2270.34,
+        "ci_upper": 2423.94
+      },
+      "baseline_policy_ev_ci": {
+        "mean": 1211.99,
+        "median": 415.2,
+        "std": 2748.54,
+        "ci_lower": 1173.24,
+        "ci_upper": 1252.34
+      },
+      "oracle_best_ev_ci": {
+        "mean": 2350.5,
+        "median": 916.63,
+        "std": 5206.53,
+        "ci_lower": 2271.79,
+        "ci_upper": 2425.37
+      },
+      "uplift_ci": {
+        "mean": 1137.12,
+        "median": 198.2,
+        "std": 3496.72,
+        "ci_lower": 1083.37,
+        "ci_upper": 1196.95
+      },
+      "regret_ci": {
+        "mean": 1.39,
+        "median": 0.0,
+        "std": 19.37,
+        "ci_lower": 1.1,
+        "ci_upper": 1.75
+      },
+      "safety_violations": 0,
+      "action_distribution": {
+        "switch_method": 0.6962,
+        "do_nothing": 0.15406666666666666,
+        "update_information": 0.1416,
+        "retry_later": 0.007933333333333334,
+        "retry_now": 0.0002
+      }
+    },
+    "SHIFT_PAYMENT_METHOD_MIX": {
+      "parameters": {
+        "upi_weight": 0.7
+      },
+      "ml_policy_ev_ci": {
+        "mean": 2349.9,
+        "median": 915.93,
+        "std": 5205.88,
+        "ci_lower": 2270.37,
+        "ci_upper": 2424.03
+      },
+      "baseline_policy_ev_ci": {
+        "mean": 1669.04,
+        "median": 658.78,
+        "std": 3566.76,
+        "ci_lower": 1616.32,
+        "ci_upper": 1721.77
+      },
+      "oracle_best_ev_ci": {
+        "mean": 2350.91,
+        "median": 916.63,
+        "std": 5206.6,
+        "ci_lower": 2272.19,
+        "ci_upper": 2425.77
+      },
+      "uplift_ci": {
+        "mean": 680.33,
+        "median": 83.31,
+        "std": 2578.73,
+        "ci_lower": 637.93,
+        "ci_upper": 723.59
+      },
+      "regret_ci": {
+        "mean": 1.54,
+        "median": 0.0,
+        "std": 24.13,
+        "ci_lower": 1.24,
+        "ci_upper": 2.02
+      },
+      "safety_violations": 0,
+      "action_distribution": {
+        "switch_method": 0.695,
+        "do_nothing": 0.15406666666666666,
+        "update_information": 0.14213333333333333,
+        "retry_later": 0.008466666666666667,
+        "retry_now": 0.0003333333333333333
+      }
+    },
+    "SHIFT_COMBINED": {
+      "parameters": {
+        "amount_multiplier": 2.5,
+        "soft_decline_weight": 0.5,
+        "upi_weight": 0.6
+      },
+      "ml_policy_ev_ci": {
+        "mean": 5896.19,
+        "median": 2314.87,
+        "std": 13016.62,
+        "ci_lower": 5698.07,
+        "ci_upper": 6081.88
+      },
+      "baseline_policy_ev_ci": {
+        "mean": 3241.11,
+        "median": 1148.84,
+        "std": 7369.49,
+        "ci_lower": 3141.95,
+        "ci_upper": 3345.1
+      },
+      "oracle_best_ev_ci": {
+        "mean": 5898.24,
+        "median": 2317.09,
+        "std": 13018.49,
+        "ci_lower": 5701.37,
+        "ci_upper": 6085.43
+      },
+      "uplift_ci": {
+        "mean": 2653.74,
+        "median": 452.5,
+        "std": 8333.0,
+        "ci_lower": 2524.61,
+        "ci_upper": 2791.64
+      },
+      "regret_ci": {
+        "mean": 3.39,
+        "median": 0.0,
+        "std": 50.31,
+        "ci_lower": 2.56,
+        "ci_upper": 4.22
+      },
+      "safety_violations": 0,
+      "action_distribution": {
+        "switch_method": 0.7017333333333333,
+        "do_nothing": 0.15406666666666666,
+        "update_information": 0.143,
+        "retry_later": 0.0012
+      }
+    }
+  },
+  "stress_testing": {
+    "subgroups": {
+      "high_value_amount_ge_50k": {
+        "count": 33,
+        "ml_oracle_ev_mean": 59453.65,
+        "baseline_oracle_ev_mean": 35266.96,
+        "regret_mean": 0.36,
+        "action_distribution": {
+          "switch_method": 0.7575757575757576,
+          "do_nothing": 0.12121212121212122,
+          "update_information": 0.12121212121212122
+        }
+      },
+      "low_value_amount_le_200": {
+        "count": 493,
+        "ml_oracle_ev_mean": 64.77,
+        "baseline_oracle_ev_mean": 51.76,
+        "regret_mean": 0.51,
+        "action_distribution": {
+          "switch_method": 0.4969574036511156,
+          "retry_later": 0.2515212981744422,
+          "do_nothing": 0.14807302231237324,
+          "update_information": 0.09330628803245436,
+          "retry_now": 0.010141987829614604
+        }
+      },
+      "high_retry_count_ge_2": {
+        "count": 2183,
+        "ml_oracle_ev_mean": 1449.31,
+        "baseline_oracle_ev_mean": 927.74,
+        "regret_mean": 1.28,
+        "action_distribution": {
+          "switch_method": 0.5029775538250114,
+          "do_nothing": 0.40219880897847,
+          "update_information": 0.09482363719651855
+        }
+      }
+    },
+    "top20_regret_summary": {
+      "mean_regret_top20": 655.49,
+      "actions_in_top20": {
+        "update_information": 14,
+        "switch_method": 4,
+        "do_nothing": 1,
+        "retry_later": 1
+      }
+    },
+    "disagreement_summary": {
+      "total_disagreements": 9933,
+      "disagreement_rate": 0.6622
+    }
+  }
+}

@@ -137,6 +137,17 @@ Evaluation is strictly partitioned into three independent methodologies:
 
 ---
 
+## Task 12 — Robustness, Sensitivity & Ablation Summary
+
+The O1 Advisor was subjected to rigorous stress testing across economic perturbations, architecture component ablations, and environment distribution shifts (see [`TASK_12_ROBUSTNESS.md`](file:///c:/Users/admin/Documents/Razorpay/TASK_12_ROBUSTNESS.md) for full report):
+
+- **Economic Sensitivity**: Performance ranking ($\text{Oracle Best} \ge \text{O1 ML Advisor} > \text{Baseline}$) remains 100% stable across 6 parameter perturbation scenarios.
+- **Safety Gate Ablation**: Removing the Safety Gate causes an alarming **84.21% safety violation rate** (12,632 illegal actions), proving the Safety Gate is a critical compliance boundary.
+- **Distribution Shift Generalization**: Without model retraining, ML policy uplift scales smoothly under amount shifts (+₹2,053.77/event under 3.0x amount shift) and failure mix shifts (+₹1,137.12/event under 60% soft decline shift).
+- **Subgroup Edge-Cases**: Zero safety violations across all high value ($\ge$ ₹50,000) and low value ($\le$ ₹200) subgroups.
+
+---
+
 ## Action Space & Recommended Policy Distribution
 
 1. `retry_now`: Immediate retry (Policy Share: 21.8%)
