@@ -5,17 +5,22 @@ Provides endpoints:
 - POST /decide
 - POST /execute
 - GET /audit/{decision_id}
+- GET /events
+- GET /reports/summary
 """
 
 import os
 import sys
+import json
+import pandas as pd
 
 repo_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
 if repo_root not in sys.path:
     sys.path.insert(0, repo_root)
 
-from fastapi import FastAPI, Depends, HTTPException, status
+from fastapi import FastAPI, Depends, HTTPException, status, Query
 from fastapi.responses import JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
 
 from src.api.schemas import (
     FailedPaymentEvent,
@@ -35,6 +40,15 @@ app = FastAPI(
     version="1.0.0"
 )
 
+# Enable CORS for frontend dashboard
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 
 @app.get("/health", response_model=dict, tags=["Health"])
 def health_check():
@@ -44,6 +58,76 @@ def health_check():
         "service": "payment-recovery-advisor",
         "version": "1.0.0",
         "data_tier": "TIER C — Synthetic Evaluation Environment"
+    }
+
+
+@app.get("/events", response_model=list, tags=["Events"])
+def get_sample_events(limit: int = Query(default=50, ge=1, le=500)):
+    """
+    Returns a sample list of synthetic failed payment events for dashboard queue inspection.
+    """
+    test_csv = os.path.join(repo_root, "data/synthetic/test.csv")
+    if not os.path.exists(test_csv):
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Synthetic test dataset not found."
+        )
+    df_test = pd.read_csv(test_csv).head(limit)
+    events = []
+    for _, row in df_test.iterrows():
+        events.append({
+            "payment_id": f"pay_{row['event_id']}",
+            "amount": float(row["amount"]),
+            "currency": row["currency"],
+            "product_category": row["product_category"],
+            "is_subscription": int(row["is_subscription"]),
+            "order_value_tier": row["order_value_tier"],
+            "payment_method": row["payment_method"],
+            "issuer_category": row["issuer_category"],
+            "card_network": row["card_network"],
+            "failure_code": row["failure_code"],
+            "failure_category": row["failure_category"],
+            "error_source": row["error_source"],
+            "error_step": row["error_step"],
+            "corridor": row["corridor"],
+            "merchant_segment": row["merchant_segment"],
+            "merchant_category": row["merchant_category"],
+            "customer_tenure_days": int(row["customer_tenure_days"]),
+            "historical_success_rate": float(row["historical_success_rate"]),
+            "historical_failed_attempts": int(row["historical_failed_attempts"]),
+            "historical_retry_count": int(row["historical_retry_count"]),
+            "time_since_last_success_hours": float(row["time_since_last_success_hours"]),
+            "retry_count_before_event": int(row["retry_count_before_event"]),
+            "hour": int(row["hour"]),
+            "day_of_week": int(row["day_of_week"]),
+            "is_weekend": int(row["is_weekend"]),
+            "logged_action": row["logged_action"],
+            "failure_timestamp": row["failure_timestamp"]
+        })
+    return events
+
+
+@app.get("/reports/summary", response_model=dict, tags=["Reports"])
+def get_evaluation_reports():
+    """
+    Returns Task 11 and Task 12 evaluation metrics JSON objects for dashboard evaluation view.
+    """
+    task11_path = os.path.join(repo_root, "reports/task11_policy_evaluation.json")
+    task12_path = os.path.join(repo_root, "reports/task12_robustness.json")
+    
+    task11_data = {}
+    if os.path.exists(task11_path):
+        with open(task11_path, "r") as f:
+            task11_data = json.load(f)
+            
+    task12_data = {}
+    if os.path.exists(task12_path):
+        with open(task12_path, "r") as f:
+            task12_data = json.load(f)
+            
+    return {
+        "task11_policy_evaluation": task11_data,
+        "task12_robustness": task12_data
     }
 
 

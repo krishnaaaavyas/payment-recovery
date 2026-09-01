@@ -25,3 +25,7 @@ Thumbs.db
 # Scratch & Task logs
 scratch/
 .system_generated/
+
+# Frontend build & dependency artifacts
+frontend/node_modules/
+frontend/dist/
