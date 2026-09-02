@@ -101,6 +101,9 @@ Where:
 
 ## 6. Anti-Circularity Safeguards Summary
 
+> [!NOTE]
+> **HISTORICAL / PRE-TASK 16B VALIDATION METRICS**: The verification metrics in the table below record initial dataset sanity checks from generation (Task 10/11). Current authoritative evaluation metrics are in `reports/task11_policy_evaluation.json` and `reports/task12_robustness.json`.
+
 | Question | Safeguard Mechanism | Verification Status |
 | :--- | :--- | :--- |
 | **1. Who chooses historical action?** | $\epsilon$-greedy historical policy ($\epsilon = 0.30$) | **PASSED** (soft_decline has 4 distinct logged actions) |

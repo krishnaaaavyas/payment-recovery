@@ -166,6 +166,9 @@ Selected model: sigmoid-calibrated `HistGradientBoostingClassifier`, chosen on v
 
 The SNIPS point estimate sits above the direct value by well under one standard error (`±₹201.53`). That gap is sampling noise from an 11.5%-ESS estimator on heavy-tailed rewards - it is not evidence of extra value, and we do not report it as uplift.
 
+> [!NOTE]
+> **SNIPS Off-Policy Estimator Disclosure**: SNIPS is an off-policy estimator rather than an upper bound; in the current synthetic evaluation its estimate (₹2,415.74/event) exceeds the direct oracle benchmark (₹2,356.66/event) by ₹59.08, within approximately 0.29 standard errors, consistent with estimator variance under limited effective sample size. The direct ground-truth simulator is the authoritative economic result. These results are evaluated within a synthetic environment and do not represent production performance.
+
 *All results are from a synthetic evaluation environment. See [Scientific Integrity & Data Tier Disclosure](#scientific-integrity--data-tier-disclosure).*
 
 ---

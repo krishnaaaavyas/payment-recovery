@@ -7,7 +7,7 @@
 
 ## 1. Architecture Overview
 
-Task 13A establishes a production-grade **FastAPI REST Service** and a **Bounded Recovery Decision Agent** (`RecoveryAgent`) that orchestrates the frozen Task 10–12 machine learning estimator (`RecoveryPredictor`), Safety Gate filter (`evaluate_safety_gate`), Economic Valuation Engine, and decision layer (`PolicyAdvisor`).
+Task 13A establishes a prototype **FastAPI REST Service** and a **Bounded Recovery Decision Agent** (`RecoveryAgent`) that orchestrates the frozen Task 10–12 machine learning estimator (`RecoveryPredictor`), Safety Gate filter (`evaluate_safety_gate`), Economic Valuation Engine, and decision layer (`PolicyAdvisor`).
 
 ```
 Payment Failure Event Request (POST /decide)
