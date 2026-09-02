@@ -1,11 +1,24 @@
-numpy>=1.24.0
-pandas>=2.0.0
-scikit-learn>=1.2.0
-scipy>=1.10.0
-PyYAML>=6.0
-matplotlib>=3.7.0
-joblib>=1.2.0
-fastapi>=0.100.0
-pydantic>=2.0.0
-uvicorn>=0.22.0
-httpx>=0.24.0
+# O1 — Payment Failure Economic Recovery Advisor
+#
+# Lower bounds are the supported floor; the exact versions this project was built,
+# trained and verified against are pinned in requirements-lock.txt.
+#
+# scikit-learn matters more than the rest: models/recovery_predictor.joblib is a
+# pickled estimator, so loading it under a different scikit-learn minor version may
+# warn or fail. If you hit an InconsistentVersionWarning, retrain rather than
+# force-loading:  python scripts/train_recovery_model.py
+#
+# Tested environment: Python 3.11.9, Windows AMD64 (see requirements-lock.txt).
+
+numpy>=1.24.0,<3.0.0
+pandas>=2.0.0,<3.0.0
+scikit-learn>=1.2.0,<2.0.0
+scipy>=1.10.0,<2.0.0
+PyYAML>=6.0,<7.0
+matplotlib>=3.7.0,<4.0.0
+joblib>=1.2.0,<2.0.0
+fastapi>=0.100.0,<1.0.0
+pydantic>=2.0.0,<3.0.0
+uvicorn>=0.22.0,<1.0.0
+httpx>=0.24.0,<1.0.0
+pytest>=7.0.0

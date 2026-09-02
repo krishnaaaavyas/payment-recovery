@@ -17,18 +17,20 @@ import pandas as pd
 from datetime import datetime, timedelta
 from typing import Dict, List, Tuple, Any
 
-from src.data.failure_taxonomy import FAILURE_TAXONOMY, ALL_ACTIONS
+from src.data.failure_taxonomy import (
+    FAILURE_TAXONOMY,
+    ALL_ACTIONS,
+    PAYMENT_METHODS,
+    ISSUER_CATEGORIES,
+    CARD_NETWORKS,
+    CORRIDORS,
+    PRODUCT_CATEGORIES,
+    MERCHANT_SEGMENTS,
+)
 from src.data.safety import evaluate_safety_gate
 from src.data.economics import calculate_ev, get_action_cost, get_friction_cost, get_downside_penalty
 from src.data.logging_policy import select_logged_action
 from src.data.ground_truth import compute_true_recovery_probability, sample_recovery_outcome
-
-PAYMENT_METHODS = ["card_credit", "card_debit", "upi_intent", "upi_collect", "netbanking"]
-ISSUER_CATEGORIES = ["psu_bank", "private_bank", "foreign_bank", "neobank"]
-CARD_NETWORKS = ["visa", "mastercard", "rupay", "amex", "none"]
-CORRIDORS = ["domestic_in", "cross_border_in_us", "cross_border_in_eu", "cross_border_in_sg"]
-PRODUCT_CATEGORIES = ["electronics", "apparel", "saas_subscription", "digital_goods", "travel", "food_delivery"]
-MERCHANT_SEGMENTS = ["e_commerce", "saas", "gaming", "travel_hospitality", "retail"]
 
 TAXONOMY_KEYS = list(FAILURE_TAXONOMY.keys())
 TAX_PROBS = [0.05, 0.03, 0.03, 0.08, 0.07, 0.20, 0.15, 0.08, 0.06, 0.08, 0.07, 0.06, 0.04]
@@ -91,8 +93,16 @@ def generate_dataset(config_path: str, num_events: int = None) -> Tuple[pd.DataF
     time_since_succ = np.round(rng.exponential(scale=48.0, size=N), 2)
     retry_before = rng.choice([0, 1, 2, 3], p=[0.60, 0.25, 0.10, 0.05], size=N)
     
-    event_ids = [f"evt_{x}" for x in rng.randint(10000000, 99999999, size=N)]
-    order_ids = [f"ord_{x}" for x in rng.randint(10000000, 99999999, size=N)]
+    # Episode identifiers must be unique: they are the join key between the observed
+    # frame and the hidden-oracle frame. Drawing them WITH REPLACEMENT (the previous
+    # `rng.randint` approach) produced ~57 collisions at N=100,000, which silently
+    # expanded the oracle frame during realignment and misaligned the two frames
+    # across the train/val/test split boundaries. See TASK_16A audit, finding C-1.
+    # Sequential identifiers are collision-free by construction and are never used
+    # as model features (see src/models/preprocessing.ALL_PREDICTOR_FEATURES).
+    event_ids = [f"evt_{i:08d}" for i in range(N)]
+    order_ids = [f"ord_{i:08d}" for i in range(N)]
+    # customer_id may legitimately repeat: one customer can have several failures.
     cust_ids = [f"cust_{x}" for x in rng.randint(100000, 999999, size=N)]
     
     observed_rows = []
@@ -223,12 +233,48 @@ def generate_dataset(config_path: str, num_events: int = None) -> Tuple[pd.DataF
         
     df_obs = pd.DataFrame(observed_rows)
     df_oracle = pd.DataFrame(oracle_rows)
-    
-    # Sort chronologically by failure_timestamp
-    df_obs = df_obs.sort_values("failure_timestamp").reset_index(drop=True)
-    df_oracle = df_oracle.set_index("event_id").loc[df_obs["event_id"]].reset_index()
-    
+
+    # Sort chronologically by failure_timestamp.
+    # The observed and oracle rows are built in the same loop iteration, so row i of
+    # one corresponds to row i of the other. We therefore reorder BOTH frames with the
+    # SAME positional permutation rather than reindexing the oracle by label. A
+    # label-based reindex (`df_oracle.set_index("event_id").loc[df_obs["event_id"]]`)
+    # silently expands rows whenever a label repeats; a positional permutation cannot.
+    sort_idx = np.argsort(df_obs["failure_timestamp"].values, kind="stable")
+    df_obs = df_obs.iloc[sort_idx].reset_index(drop=True)
+    df_oracle = df_oracle.iloc[sort_idx].reset_index(drop=True)
+
+    _assert_observed_oracle_alignment(df_obs, df_oracle, expected_rows=N)
+
     return df_obs, df_oracle
+
+
+def _assert_observed_oracle_alignment(df_obs: pd.DataFrame, df_oracle: pd.DataFrame, expected_rows: int = None):
+    """
+    Fails loudly if the observed and hidden-oracle frames are not in exact one-to-one
+    positional correspondence. Guards TASK_16A audit finding C-1.
+    """
+    if expected_rows is not None:
+        assert len(df_obs) == expected_rows, (
+            f"Observed frame has {len(df_obs)} rows, expected {expected_rows}."
+        )
+    assert len(df_obs) == len(df_oracle), (
+        f"Observed/oracle row-count mismatch: {len(df_obs)} vs {len(df_oracle)}."
+    )
+    assert df_obs["event_id"].is_unique, (
+        f"Duplicate event_id in observed frame: "
+        f"{int(df_obs['event_id'].duplicated().sum())} duplicate rows."
+    )
+    assert df_oracle["event_id"].is_unique, (
+        f"Duplicate event_id in oracle frame: "
+        f"{int(df_oracle['event_id'].duplicated().sum())} duplicate rows."
+    )
+    assert (df_obs["event_id"].values == df_oracle["event_id"].values).all(), (
+        "Observed and oracle frames are not positionally aligned by event_id."
+    )
+    assert set(df_obs["event_id"]) == set(df_oracle["event_id"]), (
+        "Observed and oracle event_id sets differ."
+    )
 
 
 def save_and_split_dataset(df_obs: pd.DataFrame, df_oracle: pd.DataFrame, output_dir: str, cfg: Dict[str, Any]):
@@ -245,16 +291,28 @@ def save_and_split_dataset(df_obs: pd.DataFrame, df_oracle: pd.DataFrame, output
         "test": (val_end, N)
     }
     
+    # Slicing both frames with identical boundaries is only valid if they are in exact
+    # positional correspondence. Verify before slicing, and again per split.
+    _assert_observed_oracle_alignment(df_obs, df_oracle, expected_rows=N)
+
+    expected_sizes = {
+        "train": train_end,
+        "val": val_end - train_end,
+        "test": N - val_end,
+    }
+
     print("=== DATASET TEMPORAL SPLIT SUMMARY ===")
     for split_name, (s, e) in splits.items():
-        obs_sub = df_obs.iloc[s:e]
-        ora_sub = df_oracle.iloc[s:e]
-        
+        obs_sub = df_obs.iloc[s:e].reset_index(drop=True)
+        ora_sub = df_oracle.iloc[s:e].reset_index(drop=True)
+
+        _assert_observed_oracle_alignment(obs_sub, ora_sub, expected_rows=expected_sizes[split_name])
+
         obs_sub.to_csv(os.path.join(output_dir, f"{split_name}.csv"), index=False)
         ora_sub.to_csv(os.path.join(output_dir, f"{split_name}_oracle.csv"), index=False)
-        
+
         print(f"  {split_name.capitalize()}: {len(obs_sub)} events | Range: {obs_sub['failure_timestamp'].min()} to {obs_sub['failure_timestamp'].max()}")
-        
+
     print(f"Dataset successfully saved to {output_dir}\n")
 
 if __name__ == "__main__":

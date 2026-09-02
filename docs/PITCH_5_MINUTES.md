@@ -13,7 +13,7 @@
 1:00–2:00 │ The O1 Solution: Constrained Economic Decision Agent
 2:00–3:00 │ Live System Demo: Detect → Predict → Value → Constrain → Decide → Audit
 3:00–4:00 │ Technical Architecture: Calibrated ML + Economics + Safety Gate
-4:00–4:30 │ Empirical Results: +56.8% SNIPS Uplift & 0% Safety Violations
+4:00–4:30 │ Empirical Results: +40.78% Net Uplift & 0% Safety Violations
 4:30–5:00 │ Summary & Data Tier Disclosure
 ```
 
@@ -30,7 +30,7 @@
 ### [0:30–1:00] The Problem — Naive Retries Cause Revenue & Friction Loss
 
 > *"Current decline-code policies operate deterministically: if a card fails, retry immediately; if a soft decline occurs, retry later. They ignore customer tenure, transaction value, issuer failure trends, and cumulative friction costs.*  
-> *Without economic optimization, merchants lose millions in recoverable GMV. But without safety constraints, ML models attempt illegal actions—like prompting users for card details during complete bank outages."*
+> *Without economic optimization, recoverable GMV is left on the table. But without safety constraints, ML models attempt illegal actions—like prompting users for card details during complete bank outages."*
 
 ---
 
@@ -59,19 +59,19 @@
 ### [3:00–4:00] Technical Depth — Calibrated ML + Economics + Safety Gate
 
 > *"Under the hood, O1 combines three core innovations:*  
-> 1. **Calibrated Machine Learning**: A `HistGradientBoosting` classifier calibrated with Isotonic Regression achieving a Brier Score of 0.1516 and ROC AUC of 0.8532.*  
+> 1. **Calibrated Machine Learning**: A `HistGradientBoosting` classifier calibrated with sigmoid (Platt) scaling achieving a held-out test Brier Score of 0.1485 and ROC AUC of 0.8600.*  
 > 2. **Net Economic Equation**: Incorporates transaction value $V$, direct action cost $C$, downside retry penalty $D$, and customer friction $F$.*  
-> 3. **Safety Gate Architecture**: Enforces domain constraints before optimization. In our ablation study, removing the Safety Gate caused an **84.21% safety violation rate**. With O1's Safety Gate, safety violations remain **0.00%**."*
+> 3. **Safety Gate Architecture**: Enforces domain constraints before optimization. In our ablation study, removing the Safety Gate caused an **83.23% constraint-breach rate**. With O1's Safety Gate, safety violations remain **0.00%**."*
 
 ---
 
 ### [4:00–4:30] Empirical Results
 
 > *"We evaluated O1 using Self-Normalized Importance Sampling (SNIPS) counterfactual evaluation on 15,000 test episodes:*  
-> - **Deterministic Baseline EV**: ₹1,546.59 / event  
-> - **O1 Economic Policy EV**: **₹2,425.91 / event**  
-> - **Net Uplift**: **+56.8% (+₹879.32 / event)**  
-> - **Oracle Regret**: **₹0.94 / event** (achieving 99.96% of theoretical maximum oracle value)  
+> - **Deterministic Baseline EV**: ₹1,671.74 / event  
+> - **O1 Economic Policy EV**: **₹2,353.54 / event**  
+> - **Net Uplift**: **+40.78% (+₹681.80 / event)** measured directly against the simulator on all 15,000 episodes  
+> - **Oracle Regret**: **₹3.12 / event** (99.87% of the oracle ceiling; O1 never beats the oracle on any individual episode)  
 > - **Safety Violations**: **0.00%**."*
 
 ---

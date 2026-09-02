@@ -1,47 +1,62 @@
 {
   "selected_model": "hist_gb_calibrated",
+  "selection_split": "validation",
+  "headline_split": "test",
+  "note": "validation_metrics were used to SELECT among candidates and are therefore optimistically biased; test_metrics are the held-out figures and are the ones to quote as model quality.",
+  "train_metrics": {
+    "roc_auc": 0.8626,
+    "log_loss": 0.4317,
+    "brier_score": 0.1474,
+    "mean_calibration_error": 0.0214
+  },
   "validation_metrics": {
-    "roc_auc": 0.8532,
-    "log_loss": 0.442,
-    "brier_score": 0.1516,
-    "mean_calibration_error": 0.013
+    "roc_auc": 0.8584,
+    "log_loss": 0.4384,
+    "brier_score": 0.1494,
+    "mean_calibration_error": 0.0166
+  },
+  "test_metrics": {
+    "roc_auc": 0.86,
+    "log_loss": 0.4344,
+    "brier_score": 0.1485,
+    "mean_calibration_error": 0.0085
   },
   "all_candidate_metrics": {
     "logistic_regression_uncalibrated": {
-      "roc_auc": 0.8383,
-      "log_loss": 0.457,
-      "brier_score": 0.1583,
-      "mean_calibration_error": 0.0098
+      "roc_auc": 0.8418,
+      "log_loss": 0.4549,
+      "brier_score": 0.1568,
+      "mean_calibration_error": 0.015
     },
     "logistic_regression_calibrated": {
-      "roc_auc": 0.8383,
-      "log_loss": 0.457,
-      "brier_score": 0.1583,
-      "mean_calibration_error": 0.0099
+      "roc_auc": 0.8419,
+      "log_loss": 0.4549,
+      "brier_score": 0.1568,
+      "mean_calibration_error": 0.0151
     },
     "random_forest_uncalibrated": {
-      "roc_auc": 0.84,
-      "log_loss": 0.4756,
-      "brier_score": 0.1616,
-      "mean_calibration_error": 0.0727
+      "roc_auc": 0.8428,
+      "log_loss": 0.4752,
+      "brier_score": 0.1606,
+      "mean_calibration_error": 0.0753
     },
     "random_forest_calibrated": {
-      "roc_auc": 0.8403,
-      "log_loss": 0.4693,
-      "brier_score": 0.1601,
-      "mean_calibration_error": 0.0459
+      "roc_auc": 0.8439,
+      "log_loss": 0.4631,
+      "brier_score": 0.1573,
+      "mean_calibration_error": 0.0363
     },
     "hist_gb_uncalibrated": {
-      "roc_auc": 0.8519,
-      "log_loss": 0.4441,
-      "brier_score": 0.1524,
-      "mean_calibration_error": 0.0206
+      "roc_auc": 0.8569,
+      "log_loss": 0.4411,
+      "brier_score": 0.1505,
+      "mean_calibration_error": 0.03
     },
     "hist_gb_calibrated": {
-      "roc_auc": 0.8532,
-      "log_loss": 0.442,
-      "brier_score": 0.1516,
-      "mean_calibration_error": 0.013
+      "roc_auc": 0.8584,
+      "log_loss": 0.4384,
+      "brier_score": 0.1494,
+      "mean_calibration_error": 0.0166
     }
   }
 }

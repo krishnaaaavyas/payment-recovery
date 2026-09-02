@@ -83,16 +83,16 @@ def generate_plots(predictor: RecoveryPredictor, advisor: PolicyAdvisor, df_test
     plt.savefig(os.path.join(fig_dir, "action_distribution.png"), dpi=300)
     plt.close()
     
-    # 4. EV Comparison Plot (IPS & Synthetic Oracle Benchmark)
-    ips_b = eval_results["off_policy_ips_evaluation"]["baseline_policy_snips_ev_inr"]
-    ips_ml = eval_results["off_policy_ips_evaluation"]["ml_policy_snips_ev_inr"]
-    
-    ora_b = eval_results["synthetic_oracle_benchmark"]["oracle_baseline_policy_ev_inr"]
-    ora_ml = eval_results["synthetic_oracle_benchmark"]["oracle_ml_policy_ev_inr"]
-    ora_opt = eval_results["synthetic_oracle_benchmark"]["oracle_best_policy_ev_inr"]
-    
+    # 4. EV Comparison Plot (Direct ground truth = authoritative; SNIPS = estimator)
+    ips_b = eval_results["off_policy_snips_evaluation"]["baseline_policy_snips_ev_inr"]
+    ips_ml = eval_results["off_policy_snips_evaluation"]["ml_policy_snips_ev_inr"]
+
+    ora_b = eval_results["direct_ground_truth_benchmark"]["direct_true_baseline_policy_ev_inr"]
+    ora_ml = eval_results["direct_ground_truth_benchmark"]["direct_true_o1_policy_ev_inr"]
+    ora_opt = eval_results["direct_ground_truth_benchmark"]["direct_true_oracle_best_ev_inr"]
+
     fig, ax = plt.subplots(figsize=(9, 5))
-    categories = ["Off-Policy SNIPS EV\n(Historical Match)", "Synthetic Oracle Benchmark\n(Ground Truth Simulation)"]
+    categories = ["SNIPS Off-Policy Estimate\n(38.5% matched episodes)", "Direct Ground-Truth Simulator\n(AUTHORITATIVE, 100% of episodes)"]
     
     b_scores = [ips_b, ora_b]
     ml_scores = [ips_ml, ora_ml]
@@ -142,23 +142,34 @@ def main():
     eval_results = run_policy_evaluation(advisor, df_test_obs, df_test_oracle)
     
     # Print evaluation summary to stdout
+    direct = eval_results["direct_ground_truth_benchmark"]
+    snips = eval_results["off_policy_snips_evaluation"]
+
     print("\n========================================================")
     print("         TASK 11 POLICY EVALUATION SUMMARY              ")
     print("========================================================")
     print(f"Test Failure Episodes:         {eval_results['test_events_count']}")
     print(f"Safety Violation Count / Rate: {eval_results['safety_evaluation']['safety_violations_count']} ({eval_results['safety_evaluation']['safety_violation_rate']:.2%})")
     print("--------------------------------------------------------")
-    print("OFF-POLICY IPS EVALUATION (Propensity-Weighted Match):")
-    print(f"  Logged Policy Realized Mean EV:  ₹{eval_results['off_policy_ips_evaluation']['logged_policy_realized_mean_ev_inr']:.2f}")
-    print(f"  Baseline Policy SNIPS EV:        ₹{eval_results['off_policy_ips_evaluation']['baseline_policy_snips_ev_inr']:.2f} (Coverage: {eval_results['off_policy_ips_evaluation']['baseline_policy_coverage_rate']:.1%})")
-    print(f"  O1 ML Policy SNIPS EV:           ₹{eval_results['off_policy_ips_evaluation']['ml_policy_snips_ev_inr']:.2f} (Coverage: {eval_results['off_policy_ips_evaluation']['ml_policy_coverage_rate']:.1%})")
-    print(f"  O1 Policy Effective Sample Size: {eval_results['off_policy_ips_evaluation']['ml_effective_sample_size']:.1f}")
+    print("[AUTHORITATIVE] DIRECT GROUND-TRUTH SIMULATOR BENCHMARK:")
+    print(f"  Events Evaluated:                {direct['events_evaluated']} / {direct['events_in_population']} (missing: {direct['events_missing_ground_truth']})")
+    print(f"  Direct True Baseline Policy EV:  ₹{direct['direct_true_baseline_policy_ev_inr']:.2f}")
+    print(f"  Direct True O1 Policy EV:        ₹{direct['direct_true_o1_policy_ev_inr']:.2f}")
+    print(f"  Direct True Oracle Best EV:      ₹{direct['direct_true_oracle_best_ev_inr']:.2f}")
+    print(f"  Direct True Regret:              ₹{direct['direct_true_regret_inr_per_event']:.4f} / event")
+    print(f"  Direct Policy Efficiency:        {direct['direct_policy_efficiency']:.4%}")
+    print(f"  Direct Uplift over Baseline:     ₹{direct['direct_uplift_over_baseline_inr_per_event']:.2f} / event ({direct['direct_uplift_over_baseline_pct']:.2f}%)")
+    print(f"  Per-Event Dominance Violations:  {direct['per_event_dominance_violations']} (regret min ₹{direct['per_event_regret_min']:.6f})")
     print("--------------------------------------------------------")
-    print("SYNTHETIC ORACLE BENCHMARK (Ground-Truth Simulation):")
-    print(f"  Oracle Baseline Policy EV:       ₹{eval_results['synthetic_oracle_benchmark']['oracle_baseline_policy_ev_inr']:.2f}")
-    print(f"  Oracle O1 ML Policy EV:          ₹{eval_results['synthetic_oracle_benchmark']['oracle_ml_policy_ev_inr']:.2f}")
-    print(f"  Oracle Best Policy EV:           ₹{eval_results['synthetic_oracle_benchmark']['oracle_best_policy_ev_inr']:.2f}")
-    print(f"  Oracle Policy Regret:            ₹{eval_results['synthetic_oracle_benchmark']['oracle_policy_regret_inr']:.2f}")
+    print("[ESTIMATOR] SNIPS OFF-POLICY EVALUATION (not ground truth):")
+    print(f"  Logged Policy Realized Mean EV:  ₹{snips['logged_policy_realized_mean_ev_inr']:.2f}")
+    print(f"  Baseline Policy SNIPS EV:        ₹{snips['baseline_policy_snips_ev_inr']:.2f} "
+          f"[95% CI ₹{snips['baseline_policy_snips_ci']['ci_lower']:.2f}–₹{snips['baseline_policy_snips_ci']['ci_upper']:.2f}] "
+          f"(Coverage: {snips['baseline_policy_coverage_rate']:.1%}, ESS: {snips['baseline_effective_sample_size']:.1f})")
+    print(f"  O1 ML Policy SNIPS EV:           ₹{snips['ml_policy_snips_ev_inr']:.2f} "
+          f"[95% CI ₹{snips['ml_policy_snips_ci']['ci_lower']:.2f}–₹{snips['ml_policy_snips_ci']['ci_upper']:.2f}] "
+          f"(Coverage: {snips['ml_policy_coverage_rate']:.1%}, ESS: {snips['ml_effective_sample_size']:.1f})")
+    print(f"  SNIPS minus Direct True EV:      ₹{snips['snips_minus_direct_true_ev_inr']:.2f} (estimator variance, not a gain)")
     print("========================================================\n")
     
     # Save evaluation report JSON

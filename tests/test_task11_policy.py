@@ -93,10 +93,57 @@ class TestTask11Policy(unittest.TestCase):
         self.assertGreaterEqual(len(rec["alternatives"]), 1)
 
     def test_10_ips_uses_logging_probability(self):
-        """Test 10: IPS evaluation uses logging_probability from dataset."""
+        """Test 10: SNIPS evaluation uses logging_probability, and reports its own uncertainty."""
         eval_res = run_policy_evaluation(self.advisor, self.df_test_obs, self.df_test_ora)
-        self.assertIn("ml_policy_ips_ev_inr", eval_res["off_policy_ips_evaluation"])
-        self.assertGreater(eval_res["off_policy_ips_evaluation"]["ml_effective_sample_size"], 0)
+        snips = eval_res["off_policy_snips_evaluation"]
+
+        self.assertIn("ml_policy_ips_ev_inr", snips)
+        self.assertGreater(snips["ml_effective_sample_size"], 0)
+
+        # Overlap must be real, not assumed: every propensity strictly positive and the
+        # resulting importance weights bounded.
+        self.assertGreater(snips["min_logging_propensity"], 0.0)
+        self.assertLess(snips["max_importance_weight"], float("inf"))
+
+        # A point estimate without an interval is not an honest summary of a
+        # high-variance estimator, so the interval must be present and ordered.
+        ci = snips["ml_policy_snips_ci"]
+        self.assertLessEqual(ci["ci_lower"], ci["point"])
+        self.assertLessEqual(ci["point"], ci["ci_upper"])
+
+        # ESS can never exceed the number of matched episodes.
+        self.assertLessEqual(snips["ml_effective_sample_size"], snips["ml_matched_events"])
+
+    def test_11_direct_benchmark_covers_whole_population(self):
+        """Test 11: the authoritative benchmark evaluates every event, dropping none."""
+        eval_res = run_policy_evaluation(self.advisor, self.df_test_obs, self.df_test_ora)
+        direct = eval_res["direct_ground_truth_benchmark"]
+
+        self.assertEqual(direct["events_evaluated"], len(self.df_test_obs))
+        self.assertEqual(direct["events_missing_ground_truth"], 0)
+
+    def test_12_o1_never_beats_oracle_on_any_event(self):
+        """Test 12: EV_true(O1) <= EV_true(oracle) per event, not merely on average."""
+        eval_res = run_policy_evaluation(self.advisor, self.df_test_obs, self.df_test_ora)
+        direct = eval_res["direct_ground_truth_benchmark"]
+
+        self.assertEqual(direct["per_event_dominance_violations"], 0)
+        self.assertGreaterEqual(direct["per_event_regret_min"], -1e-6)
+        self.assertGreaterEqual(direct["direct_true_regret_inr_per_event"], 0.0)
+        self.assertLessEqual(
+            direct["direct_true_o1_policy_ev_inr"],
+            direct["direct_true_oracle_best_ev_inr"] + 1e-6,
+        )
+
+    def test_13_oracle_join_rejects_misaligned_frames(self):
+        """
+        Test 13: a duplicated oracle row must raise rather than silently inflate the
+        population. Guards TASK_16A audit finding C-1.
+        """
+        import pandas as pd
+        corrupted = pd.concat([self.df_test_ora, self.df_test_ora.iloc[[0]]], ignore_index=True)
+        with self.assertRaises(AssertionError):
+            run_policy_evaluation(self.advisor, self.df_test_obs, corrupted)
 
 if __name__ == "__main__":
     unittest.main()

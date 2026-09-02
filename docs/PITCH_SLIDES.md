@@ -35,7 +35,7 @@
 - **Headline**: Multi-Layer Production Architecture
 - **Layer Diagram**:
   - **Data Layer**: 24-feature context vectors from public schema taxonomy
-  - **Predictive Layer**: Calibrated `HistGradientBoosting` classifier (ROC AUC 0.8532)
+  - **Predictive Layer**: Sigmoid-calibrated `HistGradientBoosting` classifier (held-out test ROC AUC 0.8600)
   - **Economic Layer**: Expected Economic Value Engine
   - **Safety Layer**: Hard deterministic Safety Gate
   - **Interface Layer**: FastAPI REST Service + React Operations Console
@@ -58,7 +58,7 @@
 - **Headline**: Safety Gate Compliance vs Ablation
 - **Visual Bar Comparison**:
   - **Full O1 Architecture (With Safety Gate)**: **0.00% Safety Violations** (0 / 15,000 episodes)
-  - **Ablation A3 (Without Safety Gate)**: **84.21% Safety Violations** (12,632 illegal action attempts)
+  - **Ablation A3 (Without Safety Gate)**: **83.23% constraint breaches** (12,485 episodes)
 - **Insight**: Safety must be an architectural boundary prior to economic optimization.
 
 ---
@@ -66,10 +66,10 @@
 ## Slide 7: Synthetic Evaluation & Performance
 - **Headline**: Off-Policy SNIPS Benchmark & Oracle Regret
 - **Key Metrics Table**:
-  - **Baseline SNIPS EV**: ₹1,546.59 / event
-  - **O1 Economic Policy EV**: **₹2,425.91 / event** (+56.8% gain / +₹879.32/event)
-  - **Oracle Theoretical Best EV**: ₹2,350.67 / event
-  - **Oracle Regret**: **₹0.94 / event** (99.96% of theoretical maximum)
+  - **Baseline EV (direct simulator)**: ₹1,671.74 / event
+  - **O1 Economic Policy EV**: **₹2,353.54 / event** (+40.78% / +₹681.80 per event)
+  - **Oracle Best Achievable EV**: ₹2,356.66 / event
+  - **Oracle Regret**: **₹3.12 / event** (99.87% of the oracle ceiling)
 - **Robustness**: Performance ranking stable across 6 economic perturbations and 3 distribution shifts.
 
 ---

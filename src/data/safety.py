@@ -4,18 +4,41 @@ Evaluates failure context X and returns allowed safe actions A_safe(X) and appli
 """
 
 from typing import Dict, List, Tuple, Any
-from src.data.failure_taxonomy import ALL_ACTIONS
+from src.data.failure_taxonomy import FAILURE_TAXONOMY, ALL_ACTIONS
+
+# Closed vocabulary of failure categories this Safety Gate is specified for.
+# Anything outside it is unrecognized and must fail CLOSED (Rule 0).
+SUPPORTED_FAILURE_CATEGORIES = frozenset(FAILURE_TAXONOMY.keys())
 
 def evaluate_safety_gate(context: Dict[str, Any]) -> Tuple[List[str], List[str]]:
     """
     Returns (safe_actions, constraints_applied).
-    Guarantees ML model or policy can NEVER choose an illegal action.
+
+    Fail-closed contract: an action is permitted only if a rule below explicitly
+    permits it for a RECOGNIZED failure category. Any category outside
+    SUPPORTED_FAILURE_CATEGORIES — including case variants, whitespace-padded
+    values, and novel strings — collapses the action set to ["do_nothing"].
+
+    This is a default-deny gate. Previously it was a deny-list with no terminal
+    branch, so an unrecognized category fell through to the full five-action set
+    with an empty constraint list (TASK_16A audit, finding C-2).
     """
     cat = context.get("failure_category", "")
     retry_count = context.get("retry_count_before_event", 0)
-    
+
     constraints_applied = []
-    
+
+    # Rule 0: DEFAULT DENY — unrecognized / malformed failure category.
+    # No normalization is attempted on purpose: silently coercing "HARD_DECLINE" or
+    # " hard_decline " to a known category would mask an upstream integration fault.
+    # The gate blocks; the API layer rejects such values outright with HTTP 422.
+    # Non-string values (None, numbers, lists) are unrecognized by definition and must
+    # not raise on the membership test - an exception here would be a fail-open path if
+    # any caller were to swallow it.
+    if not isinstance(cat, str) or cat not in SUPPORTED_FAILURE_CATEGORIES:
+        constraints_applied.append("HARD_SAFETY_UNKNOWN_FAILURE_CATEGORY")
+        return ["do_nothing"], constraints_applied
+
     # Rule 1: Non-retryable / Fraud / Hard Decline / Blocked Instrument
     if cat in ["hard_decline", "blocked_instrument", "velocity_limit"]:
         constraints_applied.append(f"HARD_SAFETY_NON_RETRYABLE_{cat.upper()}")

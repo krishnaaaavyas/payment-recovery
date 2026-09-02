@@ -8,10 +8,10 @@
 ## Technical Pitch Walkthrough (2–3 Minutes)
 
 ```text
-00:00 — Overview: Problem Statement & +56.8% Economic Gains
+00:00 — Overview: Problem Statement & +40.78% Economic Gains
 00:25 — Payment Failure Ingestion & Queue Filtering
 00:45 — Real-Time AI Decision Engine (POST /decide)
-01:15 — Safety Gate Enforcement (0.00% vs 84.21% Ablation)
+01:15 — Safety Gate Enforcement (0.00% vs 83.23% Ablation)
 01:35 — Simulated Action Execution (POST /execute)
 01:55 — Immutable Decision Audit Trail (GET /audit/{id})
 02:15 — Off-Policy SNIPS & Oracle Benchmark Verification
@@ -41,8 +41,8 @@ Open browser at `http://localhost:5173`.
 #### [00:00 - 00:25] 1. Overview Dashboard
 - **Presenter**: *"Payment failures create substantial recoverable revenue loss. Standard decline-code rules apply static actions, while unconstrained ML models violate compliance boundaries. O1 estimates recovery probability $P(\text{recovery}|X, a)$ and net Expected Economic Value $EV(a|X)$ to select the optimal safe intervention."*
 - **Action**: Highlight top metric cards:
-  - **O1 SNIPS Policy EV**: **₹2,425.91 / event** vs Baseline **₹1,546.59 / event** (+56.8% economic gain / +₹879.32 net value / event).
-  - **Safety Gate Feature Comparison**: **0.00% Safety Violations** under O1 vs **84.21% Safety Violations** (12,632 illegal action attempts) without Safety Gate constraints (Ablation A3).
+  - **O1 Policy EV (direct simulator)**: **₹2,353.54 / event** vs Baseline **₹1,671.74 / event** (+40.78% / +₹681.80 per event, all 15,000 episodes).
+  - **Safety Gate Feature Comparison**: **0.00% safety violations** under O1 vs **83.23% constraint breaches** (12,485 episodes) without Safety Gate constraints (Ablation A3).
 
 #### [00:25 - 00:45] 2. Payment Failure Queue
 - **Presenter**: *"Here we see active failed payment episodes ingested from our synthetic test evaluation dataset. We can filter by method, failure category, or order amount."*
@@ -67,7 +67,7 @@ Open browser at `http://localhost:5173`.
 - **Action**: Click **"Inspect Full Decision Audit Record"**. Show the 5-action probability/EV candidate evaluation matrix and toggle **"View Raw JSON"**.
 
 #### [01:55 - 02:15] 6. Scientific Evaluation Metrics
-- **Presenter**: *"Finally, our evaluation dashboard confirms model predictive quality (ROC AUC 0.8532, Brier Score 0.1516), near-zero theoretical oracle regret (₹0.94/event), and performance ranking stability across economic perturbations and distribution shifts."*
+- **Presenter**: *"Finally, our evaluation dashboard confirms model predictive quality (held-out test ROC AUC 0.8600, Brier Score 0.1485), near-zero theoretical oracle regret (₹0.94/event), and performance ranking stability across economic perturbations and distribution shifts."*
 - **Action**: Click **"Evaluation Metrics"** tab. Point out persistent Tier C synthetic evaluation disclosure.
 
 ---

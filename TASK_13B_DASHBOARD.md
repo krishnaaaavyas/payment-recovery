@@ -53,11 +53,11 @@ frontend/
     └── components/
         ├── Header.tsx            # Title, health status, Tier C synthetic disclosure badge
         ├── Navigation.tsx        # Responsive navigation tabs
-        ├── Overview.tsx          # 30-sec pitch summary, EV comparison, 0% vs 84.21% safety ablation
+        ├── Overview.tsx          # 30-sec summary, EV comparison, safety ablation (live from /reports/summary)
         ├── PaymentQueue.tsx      # Ingested synthetic failure episodes table with filters
         ├── DecisionInspector.tsx # Real-time POST /decide & POST /execute interaction
         ├── AuditTrail.tsx        # Immutable decision record lookup (GET /audit/{id})
-        └── Evaluation.tsx        # ROC AUC 0.8532, SNIPS EV +56.8%, Oracle Regret ₹0.94
+        └── Evaluation.tsx        # Direct benchmark, SNIPS + CIs, ablation, robustness (live from /reports/summary)
 ```
 
 ---
@@ -66,9 +66,9 @@ frontend/
 
 ### 1. Overview Dashboard
 - **Aggregate Revenue at Risk**: 15,000 synthetic test payment failure episodes.
-- **Off-Policy SNIPS EV**: Baseline **₹1,546.59** vs O1 Policy **₹2,425.91** (+56.8% economic gain / +₹879.32 net value / event).
-- **Recommended Action Share**: `retry_later` (41.2%), `retry_now` (21.8%), `switch_method` (18.5%), `do_nothing` (10.7%), `update_information` (7.8%).
-- **Safety Gate Feature Comparison**: Highlighted comparison showing **0.00% safety violations** under Full O1 Architecture vs **84.21% safety violations** (12,632 illegal action attempts) without Safety Gate constraints (Ablation A3).
+- **Direct ground-truth EV (authoritative)**: Baseline **₹1,671.74** vs O1 Policy **₹2,353.54** (+40.78% / +₹681.80 per event). SNIPS estimator shown alongside with its 95% interval.
+- **Recommended Action Share**: rendered from `reports/task11_policy_evaluation.json` - currently `switch_method` (67.85%), `do_nothing` (15.41%), `update_information` (14.23%), `retry_later` (2.47%), `retry_now` (0.04%).
+- **Safety Gate Feature Comparison**: **0.00% safety violations** under the full O1 architecture vs **83.23%** (12,485 constraint breaches) without Safety Gate constraints (Ablation A3).
 
 ### 2. Payment Failure Queue
 - Interactive table displaying synthetic failure episodes fetched from `GET /events?limit=50`.
@@ -93,7 +93,7 @@ frontend/
 - Renders complete action candidate evaluation matrix, safety clearance, predicted probabilities, EV values, selection status, and raw JSON snapshot viewer.
 
 ### 5. Evaluation Dashboard
-- Summarizes Task 11 and Task 12 off-policy evaluation, model predictive metrics (ROC AUC 0.8532, Brier Score 0.1516), Oracle theoretical benchmark (regret ₹0.94/event), and Task 12 economic sensitivity & distribution shift robustness table.
+- Summarizes Task 11 and Task 12 evaluation, model predictive metrics (held-out test ROC AUC 0.8600, Brier 0.1485), the direct ground-truth benchmark (regret ₹3.12/event), and Task 12 economic sensitivity & distribution shift robustness table.
 
 ---
 
@@ -116,11 +116,11 @@ Open browser at `http://localhost:5173`.
 
 ## 5. 60–90 Second Reviewer Demo Flow
 
-1. **Overview (15s)**: Open Overview. Show +56.8% SNIPS economic gain (+₹879.32/event) and the Safety Gate comparison widget (0.00% vs 84.21% ablation).
+1. **Overview (15s)**: Open Overview. Show the +40.78% net economic gain (+₹681.80/event) and the Safety Gate comparison widget (0.00% vs 83.23% ablation).
 2. **Payment Queue (15s)**: Open Payment Queue. Filter by `UPI Intent` or `Network Timeout`. Select payment episode `pay_evt_88840335` and click **"Analyze"**.
 3. **Decision Inspector (25s)**: Click **"Analyze Recovery with O1"** (invokes `POST /decide`). Review recommended action `switch_method`, recovery probability `52.45%`, net expected value `₹276.17`, and evidence rationale. Click **"Execute Action"** (invokes `POST /execute`).
 4. **Audit Trail (15s)**: Click **"Inspect Full Decision Audit Record"** (invokes `GET /audit/{id}`). Show full 5-action probability/EV matrix and immutable decision record.
-5. **Evaluation (10s)**: Open Evaluation tab to view ROC AUC `0.8532` and Oracle Regret `₹0.94`.
+5. **Evaluation (10s)**: Open Evaluation tab to view held-out test ROC AUC `0.8600` and oracle regret `₹3.12`.
 
 ---
 

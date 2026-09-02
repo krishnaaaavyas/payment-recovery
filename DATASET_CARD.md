@@ -21,7 +21,12 @@ It enables:
 
 ## Dataset Scale & Splits
 - **Total Failure Events**: 100,000 episodes
-- **Temporal Splitting**: Chronological 70% Train / 15% Validation / 15% Test split based on `failure_timestamp` (Date range: June 1, 2026 to August 30, 2026).
+- **Temporal Splitting**: Chronological 70% Train / 15% Validation / 15% Test split based on `failure_timestamp` (Date range: June 1, 2026 to August 30, 2026). Observed and hidden-oracle rows are reordered with the same positional permutation and asserted to be in exact one-to-one correspondence before and after splitting.
+
+> **Interpretation caveat.** Timestamps are drawn i.i.d. from the window and then sorted, so
+> the generating distribution does not change over time. The chronological split is therefore
+> statistically equivalent to a random split: it guarantees no episode-level overlap between
+> splits, but it does **not** test temporal drift or seasonality.
 
 | Split | Event Count | Date Range | File Name |
 | :--- | :--- | :--- | :--- |
@@ -34,7 +39,7 @@ It enables:
 ## Feature Schema
 
 ### 1. Identity & Order Context
-- `event_id`: Unique synthetic episode ID (`evt_...`)
+- `event_id`: Unique synthetic episode ID (`evt_00000000` .. `evt_00099999`), assigned sequentially so it is collision-free by construction. It is the join key between the observed and oracle frames and is **not** a model feature.
 - `order_id`: Synthetic order ID (`ord_...`)
 - `customer_id`: Synthetic customer ID (`cust_...`)
 - `failure_timestamp`: Timestamp of initial failure event (`YYYY-MM-DD HH:MM:SS`)

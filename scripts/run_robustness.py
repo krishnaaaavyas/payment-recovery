@@ -26,7 +26,8 @@ from src.evaluation.robustness import (
     run_economic_sensitivity,
     run_ablation_study,
     run_distribution_shifts,
-    run_stress_testing
+    run_stress_testing,
+    run_ground_truth_robustness
 )
 
 def generate_robustness_plots(results: dict, fig_dir: str = "reports/figures/task12"):
@@ -164,9 +165,13 @@ def main():
     
     print("4. Running Stress Testing...")
     stress_results = run_stress_testing(advisor, df_test_obs, df_test_oracle, precomputed_probs=precomputed_probs)
-    
+
+    print("5. Running Ground-Truth Interaction Robustness...")
+    gt_results = run_ground_truth_robustness(advisor, df_test_obs, precomputed_probs=precomputed_probs)
+
     all_results = {
         "economic_sensitivity": econ_results,
+        "ground_truth_robustness": gt_results,
         "ablation_study": ablation_results,
         "distribution_shifts": shift_results,
         "stress_testing": stress_results

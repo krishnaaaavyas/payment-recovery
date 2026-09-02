@@ -5,39 +5,75 @@
     "safety_violation_rate": 0.0
   },
   "predictive_expected_metrics": {
-    "mean_expected_recovery_probability": 0.5909,
-    "mean_expected_ev_inr": 2287.69,
-    "expected_recovered_gmv_inr": 2301.99
+    "mean_expected_recovery_probability": 0.591,
+    "mean_expected_ev_inr": 2314.35,
+    "expected_recovered_gmv_inr": 2328.49
   },
-  "off_policy_ips_evaluation": {
-    "logged_policy_realized_mean_ev_inr": 1555.19,
-    "baseline_policy_ips_ev_inr": 1549.81,
-    "baseline_policy_snips_ev_inr": 1546.59,
-    "baseline_policy_coverage_rate": 0.729,
-    "ml_policy_ips_ev_inr": 2368.83,
-    "ml_policy_snips_ev_inr": 2425.91,
-    "ml_policy_coverage_rate": 0.3847,
-    "ml_effective_sample_size": 1730.5
+  "direct_ground_truth_benchmark": {
+    "role": "AUTHORITATIVE synthetic-policy benchmark \u2014 full population, hidden simulator.",
+    "disclaimer": "Synthetic environment only \u2014 not Razorpay production evidence.",
+    "events_evaluated": 15000,
+    "events_in_population": 15000,
+    "events_missing_ground_truth": 0,
+    "direct_true_o1_policy_ev_inr": 2353.54,
+    "direct_true_oracle_best_ev_inr": 2356.66,
+    "direct_true_baseline_policy_ev_inr": 1671.74,
+    "direct_true_regret_inr_per_event": 3.1197,
+    "direct_policy_efficiency": 0.998676,
+    "direct_uplift_over_baseline_inr_per_event": 681.8,
+    "direct_uplift_over_baseline_pct": 40.78,
+    "per_event_dominance_violations": 0,
+    "per_event_regret_min": 0.0,
+    "per_event_regret_max": 1025.2,
+    "action_matches_oracle_best_rate": 0.9685
   },
-  "synthetic_oracle_benchmark": {
-    "disclaimer": "Synthetic oracle benchmark \u2014 not production evidence.",
-    "oracle_baseline_policy_ev_inr": 1668.04,
-    "oracle_ml_policy_ev_inr": 2349.72,
-    "oracle_best_policy_ev_inr": 2350.67,
-    "oracle_policy_regret_inr": 0.94
+  "off_policy_snips_evaluation": {
+    "role": "Off-policy estimator (deployment-style analogue) \u2014 NOT ground truth.",
+    "interpretation": "SNIPS estimates policy value from logged episodes where the target policy happens to agree with the logging policy, reweighted by 1/e(a|X). It is unbiased in expectation but high-variance at this coverage; the direct ground-truth benchmark above is the authoritative value.",
+    "logged_policy_realized_mean_ev_inr": 1596.19,
+    "baseline_policy_ips_ev_inr": 1693.5,
+    "baseline_policy_snips_ev_inr": 1676.6,
+    "baseline_policy_snips_ci": {
+      "point": 1676.6,
+      "ci_lower": 1567.68,
+      "ci_upper": 1785.87,
+      "std_error": 54.64,
+      "n_bootstraps": 2000
+    },
+    "baseline_policy_coverage_rate": 0.7271,
+    "baseline_matched_events": 10906,
+    "baseline_effective_sample_size": 5333.6,
+    "ml_policy_ips_ev_inr": 2437.14,
+    "ml_policy_snips_ev_inr": 2415.74,
+    "ml_policy_snips_ci": {
+      "point": 2415.74,
+      "ci_lower": 2088.89,
+      "ci_upper": 2861.67,
+      "std_error": 201.53,
+      "n_bootstraps": 2000
+    },
+    "ml_policy_coverage_rate": 0.378,
+    "ml_matched_events": 5670,
+    "ml_effective_sample_size": 1724.6,
+    "ml_effective_sample_size_fraction": 0.115,
+    "min_logging_propensity": 0.075,
+    "max_importance_weight": 13.33,
+    "weight_clipping_applied": false,
+    "snips_uplift_over_baseline_inr_per_event": 739.14,
+    "snips_minus_direct_true_ev_inr": 62.2
   },
   "distributions": {
     "ml_action_distribution": {
-      "switch_method": 0.6945,
+      "switch_method": 0.6785,
       "do_nothing": 0.1541,
-      "update_information": 0.1421,
-      "retry_later": 0.0089,
-      "retry_now": 0.0003
+      "update_information": 0.1423,
+      "retry_later": 0.0247,
+      "retry_now": 0.0004
     },
     "confidence_distribution": {
-      "high": 0.8127,
-      "medium": 0.1543,
-      "low": 0.033
+      "high": 0.8045,
+      "medium": 0.1509,
+      "low": 0.0445
     }
   }
 }

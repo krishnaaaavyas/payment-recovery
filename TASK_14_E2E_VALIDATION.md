@@ -68,11 +68,11 @@
 
 - **Production Build**: Executed `npm run build` (`tsc && vite build`). Built cleanly in **2.24s** with **0 TypeScript errors**.
 - **Metric Verification**:
-  - Baseline SNIPS EV: **₹1,546.59 / event** (Matches `reports/task11_policy_evaluation.json`).
-  - O1 SNIPS Policy EV: **₹2,425.91 / event** (+56.8% gain / +₹879.32/event over baseline).
-  - ROC AUC: **0.8532**, Brier Score: **0.1516** (Matches Task 11 model reports).
-  - Oracle Regret: **₹0.94 / event** (Matches theoretical oracle benchmark).
-  - Safety Violations: **0.00%** (With Safety Gate) vs **84.21%** (Without Safety Gate, Ablation A3).
+  - Direct ground-truth baseline EV: **₹1,671.74 / event** (matches `reports/task11_policy_evaluation.json`).
+  - Direct ground-truth O1 policy EV: **₹2,353.54 / event** (+40.78% / +₹681.80 per event over baseline, full 15,000-episode population). SNIPS estimator: ₹2,415.74 [95% CI ₹2,088.89-₹2,861.67].
+  - Held-out test ROC AUC: **0.8600**, Brier Score: **0.1485** (matches `reports/task11_model_results.json`; validation figures 0.8584 / 0.1494 were used for model selection).
+  - Oracle regret: **₹3.12 / event** (99.87% of the oracle ceiling; 0 per-event dominance violations).
+  - Safety violations: **0.00%** (with Safety Gate) vs **83.23%** (without, Ablation A3).
 
 ---
 

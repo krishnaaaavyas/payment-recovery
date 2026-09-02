@@ -102,3 +102,30 @@ FAILURE_TAXONOMY: Dict[str, Dict[str, Any]] = {
 }
 
 ALL_ACTIONS = ["retry_now", "retry_later", "switch_method", "update_information", "do_nothing"]
+
+# ---------------------------------------------------------------------------
+# Closed context vocabularies.
+#
+# These are the ONLY values the synthetic environment generates and therefore the
+# only values the fitted OneHotEncoder has categories for. Because the encoder is
+# configured with handle_unknown="ignore", an out-of-vocabulary value is silently
+# encoded as an all-zero block and yields a degraded prediction with no error.
+# The API validates against these lists so such inputs are rejected explicitly
+# instead of being scored silently (TASK_16A audit, finding N-1).
+#
+# Defined here rather than in the generator so that the generator, the API schema
+# and the safety gate cannot drift apart.
+# ---------------------------------------------------------------------------
+PAYMENT_METHODS = ["card_credit", "card_debit", "upi_intent", "upi_collect", "netbanking"]
+ISSUER_CATEGORIES = ["psu_bank", "private_bank", "foreign_bank", "neobank"]
+CARD_NETWORKS = ["visa", "mastercard", "rupay", "amex", "none"]
+CORRIDORS = ["domestic_in", "cross_border_in_us", "cross_border_in_eu", "cross_border_in_sg"]
+PRODUCT_CATEGORIES = ["electronics", "apparel", "saas_subscription", "digital_goods", "travel", "food_delivery"]
+MERCHANT_SEGMENTS = ["e_commerce", "saas", "gaming", "travel_hospitality", "retail"]
+MERCHANT_CATEGORIES = [f"cat_{m}" for m in MERCHANT_SEGMENTS]
+ORDER_VALUE_TIERS = ["low", "medium", "high", "enterprise"]
+CURRENCIES = ["INR", "USD"]
+ERROR_SOURCES = sorted({meta["error_source"] for meta in FAILURE_TAXONOMY.values()})
+ERROR_STEPS = sorted({meta["error_step"] for meta in FAILURE_TAXONOMY.values()})
+FAILURE_CATEGORIES = list(FAILURE_TAXONOMY.keys())
+FAILURE_CODES = sorted({c for meta in FAILURE_TAXONOMY.values() for c in meta["default_codes"]})

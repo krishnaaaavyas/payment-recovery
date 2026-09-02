@@ -1,5 +1,30 @@
 # Task 16 — Clean-Environment Reproduction & Repository Audit Report
 
+> [!WARNING]
+> **SUPERSEDED — HISTORICAL RECORD ONLY.**
+>
+> This report describes the repository **before** the Task 16A independent audit and the
+> Task 16B corrections. Every metric below was computed on the pre-correction dataset and
+> code, and several of its own statements were subsequently found to be wrong:
+>
+> - The logging policy epsilon is **0.30**, not 0.20.
+> - Calibration is **sigmoid (Platt)**, not isotonic.
+> - Matched episodes numbered **5,770**, not 5,775.
+> - There are **4** distribution-shift scenarios, not 3.
+> - The claim that the per-episode inequality "holds perfectly across 100% of test episodes"
+>   was never computed by the code; the implementation compared two aggregate means over
+>   mismatched populations.
+> - The oracle regret of INR 0.94 was computed across misaligned observed/oracle
+>   populations and is not a valid regret.
+>
+> **The numbers in this file are NOT the project's current results.** They are retained
+> unaltered as evidence of what was claimed at commit `156a4cc`. For current authoritative
+> figures see `TASK_16B_SCIENTIFIC_CORRECTIONS.md`, `README.md` and `reports/*.json`. For
+> the audit that identified these defects see
+> `docs/audits/TASK_16A_INDEPENDENT_SCIENTIFIC_AUDIT.md`.
+
+---
+
 > **Razorpay Buildathon 2026 — Track 03: AI Revenue Recovery**  
 > **Project**: O1 — Payment Failure Economic Recovery Advisor  
 > **Repository**: `C:\Users\admin\Documents\Razorpay`  

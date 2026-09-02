@@ -4,8 +4,8 @@
 
 [![Buildathon Track](https://img.shields.io/badge/Razorpay%20Buildathon%202026-Track%2003%3A%20AI%20Revenue%20Recovery-indigo)](https://razorpay.com)
 [![Data Tier](https://img.shields.io/badge/Data%20Tier-TIER%20C%20Synthetic%20Environment-amber)](#scientific-integrity--data-tier-disclosure)
-[![Safety Violations](https://img.shields.io/badge/Safety%20Violations-0.00%25-emerald)](#safety-model--the-8421-ablation-finding)
-[![SNIPS Uplift](https://img.shields.io/badge/SNIPS%20Net%20EV%20Uplift-%2B56.8%25-emerald)](#evaluation-results)
+[![Safety Violations](https://img.shields.io/badge/Safety%20Violations-0.00%25-emerald)](#safety-model--the-ablation-finding)
+[![Net EV Uplift](https://img.shields.io/badge/Direct%20Net%20EV%20Uplift-%2B40.78%25-emerald)](#evaluation-results)
 
 ---
 
@@ -100,60 +100,109 @@ where:
 
 ---
 
-## Safety Model & The 84.21% Ablation Finding
+## Safety Model & The Ablation Finding
 
 Safety constraints are enforced **before** economic optimization:
 
 $$a^* = \arg\max_{a \in A_{\text{safe}}(X)} EV(a \mid X)$$
 
-### Crucial Research Finding: Safety as an Architectural Constraint
-In our Task 12 ablation study, removing the Safety Gate (Ablation A3) caused an **84.21% safety violation rate** (12,632 illegal action attempts out of 15,000 test episodes). Unconstrained ML models attempt to prompt users for information updates during complete bank downtime because the transaction value is high.
+The gate is **default-deny**: an action is permitted only if a rule explicitly permits it for a *recognized* failure category. Any category outside the 13-entry taxonomy - including case variants, whitespace-padded values and novel strings - collapses the action set to `do_nothing`, and the API rejects such values with HTTP 422 before they reach the model.
 
-With O1's Safety Gate, safety violations remain **0.00% across all operations**.
+### Research finding: safety as an architectural constraint that costs value
+
+In our Task 12 ablation study, removing the Safety Gate (Ablation A3) breaches the action constraints on **83.23% of episodes** (12,485 of 15,000).
+
+The mechanism is **action-space extrapolation**, not model malice. `update_information` is only ever *logged* in the contexts where the gate permits it (expired card / invalid information), so the model learns a strong association for it and over-generalizes to contexts where that action-context pair was never observed. This is a positivity violation.
+
+Scored honestly on the **full** population, the unconstrained variant reaches ₹2,454.54/event against the gated architecture's ₹2,353.54 - so in this synthetic environment **the Safety Gate costs roughly ₹101/event of expected value**. It is a compliance boundary we impose, not a free optimization: the modelled ₹5.00 misalignment penalty is far too small to justify it on economics alone. We report this rather than presenting the gate as costless.
+
+With the Safety Gate active, safety violations are **0.00%** across the 15,000-episode synthetic test set.
 
 ---
 
 ## Evaluation Results
 
-Evaluated on 15,000 synthetic test payment failure episodes using Self-Normalized Importance Sampling (SNIPS) counterfactual off-policy evaluation and ground-truth oracle theoretical benchmarks:
+Evaluated on the 15,000-episode held-out synthetic test split. Two evaluations are reported and they answer different questions - the distinction matters:
 
-| Metric | Result | Description / Notes |
+- **Direct ground-truth simulator (authoritative).** Scores the policy against the hidden simulator on *every* episode. No matched subset, no importance weights, no estimator variance. This is the headline benchmark.
+- **SNIPS off-policy estimator (deployment analogue).** Estimates policy value only from logged episodes where O1 happens to agree with the historical policy, reweighted by `1/e(a|X)`. It is what a real deployment would have to rely on before running an experiment, so we report it - but it uses a fraction of the data and carries wide uncertainty.
+
+### Model quality
+
+| Metric | Value | Split |
 | :--- | :---: | :--- |
-| **Model Predictive ROC AUC** | `0.8532` | Calibrated `HistGradientBoostingClassifier` |
-| **Model Brier Score** | `0.1516` | High probability estimation accuracy |
-| **Baseline SNIPS EV** | `₹1,546.59` | Deterministic decline-code policy |
-| **O1 Economic Policy EV** | `₹2,425.91` | SNIPS off-policy propensity evaluation |
-| **SNIPS Net Economic Uplift** | **`+56.8%`** | **`+₹879.32 / event` net value gain** |
-| **Oracle Theoretical Best EV** | `₹2,350.67` | Theoretical maximum oracle policy |
-| **Oracle Policy Regret** | `₹0.94` | 99.96% of theoretical maximum oracle value |
-| **Safety Violation Rate** | **`0.00%`** | Full O1 Architecture with Safety Gate |
-| **Without Safety Gate** | `84.21%` | Ablation A3 (Unconstrained EV maximization) |
+| **ROC AUC** | `0.8600` | **Held-out test** (headline) |
+| **Brier Score** | `0.1485` | **Held-out test** (headline) |
+| Mean calibration error | `0.0085` | Held-out test |
+| ROC AUC / Brier | `0.8584` / `0.1494` | Validation - used to *select* the model, so optimistically biased |
 
-*Notice: All results derived from synthetic evaluation environment.*
+Selected model: sigmoid-calibrated `HistGradientBoostingClassifier`, chosen on validation Brier among 6 candidates.
+
+### Policy economics - direct ground-truth simulator (authoritative)
+
+| Metric | Result | Notes |
+| :--- | :---: | :--- |
+| Episodes scored | `15,000 / 15,000` | None dropped |
+| Deterministic baseline EV | `₹1,671.74` | Decline-code rules |
+| **O1 economic policy EV** | **`₹2,353.54`** | Safety-constrained EV maximization |
+| Oracle best achievable EV | `₹2,356.66` | `max` over the safe set with true probabilities |
+| **Net uplift over baseline** | **`+₹681.80 / event` (+40.78%)** | Full population |
+| **Regret vs oracle** | **`₹3.12 / event`** | 99.87% of the oracle ceiling |
+| Per-event dominance violations | `0` | `EV_true(O1) <= EV_true(oracle)` holds on every episode |
+| Action matches oracle-best | `96.85%` | |
+| Safety violation rate | **`0.00%`** | Full architecture |
+| Without Safety Gate (A3) | `83.23%` | Ablation - see above |
+
+### Policy economics - SNIPS off-policy estimator
+
+| Metric | Result | Notes |
+| :--- | :---: | :--- |
+| Logged epsilon-greedy policy realized EV | `₹1,596.19` | epsilon = 0.30 |
+| Baseline SNIPS EV | `₹1,676.60` | 95% CI `₹1,567.68 - ₹1,785.87`, coverage 72.71% |
+| O1 SNIPS EV | `₹2,415.74` | 95% CI `₹2,088.89 - ₹2,861.67`, coverage 37.80% |
+| Effective sample size | `1,724.6` | 11.5% of N - the reason the interval is wide |
+| Min logging propensity / max weight | `0.075` / `13.33` | Overlap holds; no clipping needed or applied |
+| SNIPS minus direct true EV | `+₹62.20` | **Estimator variance, not additional recovered value** |
+
+The SNIPS point estimate sits above the direct value by well under one standard error (`±₹201.53`). That gap is sampling noise from an 11.5%-ESS estimator on heavy-tailed rewards - it is not evidence of extra value, and we do not report it as uplift.
+
+*All results are from a synthetic evaluation environment. See [Scientific Integrity & Data Tier Disclosure](#scientific-integrity--data-tier-disclosure).*
 
 ---
 
 ## Robustness & Sensitivity Matrix
 
-Task 12 evaluated O1 across 6 economic parameter perturbations and 3 distribution shifts:
+Task 12 re-scores the **frozen** policy across 6 economic perturbations, 3 ground-truth interaction scalings and 4 distribution shifts. In every scenario the ground truth is recomputed for the perturbed world, so the policy is never scored against the truth of a different environment. Values below are read from [`reports/task12_robustness.json`](reports/task12_robustness.json).
 
-| Perturbation / Shift | Baseline EV | O1 Policy EV | Oracle Best EV | Net Uplift | Stability |
-| :--- | :---: | :---: | :---: | :---: | :---: |
-| **Baseline Scenario** | ₹1,668.04 | **₹2,349.72** | ₹2,350.67 | +₹681.68 | **STABLE** |
-| **High Retry Cost (2.5x)** | ₹1,659.54 | **₹2,343.83** | ₹2,344.82 | +₹684.29 | **STABLE** |
-| **High Friction (2.0x)** | ₹1,656.32 | **₹2,345.92** | ₹2,347.01 | +₹689.60 | **STABLE** |
-| **3.0x Amount Shift** | ₹5,004.12 | **₹7,057.89** | ₹7,060.75 | +₹2,053.77 | **STABLE** |
+| Scenario | Baseline EV | O1 Policy EV | Oracle Best EV | Net Uplift | Regret | Ranking |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: |
+| **Economic - baseline** | ₹1,671.74 | **₹2,353.54** | ₹2,356.66 | +₹681.80 | ₹3.12 | STABLE |
+| Economic - low value (0.5x) | ₹841.64 | **₹1,128.78** | ₹1,130.52 | +₹287.14 | ₹1.74 | STABLE |
+| Economic - high value (2.0x) | ₹3,301.58 | **₹4,903.38** | ₹4,912.34 | +₹1,601.80 | ₹8.96 | STABLE |
+| Economic - high retry cost (2.0x) | ₹1,668.94 | **₹2,349.04** | ₹2,352.20 | +₹680.10 | ₹3.15 | STABLE |
+| Economic - high friction (2.0x) | ₹1,667.54 | **₹2,343.83** | ₹2,347.09 | +₹676.29 | ₹3.26 | STABLE |
+| Economic - high downside (2.0x) | ₹1,670.71 | **₹2,353.54** | ₹2,356.66 | +₹682.83 | ₹3.12 | STABLE |
+| **Ground truth - weaker interactions (0.5x)** | ₹1,565.17 | **₹2,066.47** | ₹2,069.58 | +₹501.30 | ₹3.12 | STABLE |
+| **Ground truth - stronger interactions (1.5x)** | ₹1,678.18 | **₹2,481.09** | ₹2,483.44 | +₹802.91 | ₹2.35 | STABLE |
+| **Shift - transaction value 3.0x** | ₹4,914.61 | **₹7,516.64** | ₹7,521.71 | +₹2,602.03 | ₹5.08 | STABLE |
+| **Shift - failure mix (60% soft decline)** | ₹1,380.30 | **₹2,483.54** | ₹2,487.83 | +₹1,103.24 | ₹4.29 | STABLE |
+| **Shift - payment mix (70% UPI)** | ₹1,659.93 | **₹2,359.09** | ₹2,362.06 | +₹699.16 | ₹2.96 | STABLE |
+| **Shift - combined** | ₹3,414.69 | **₹6,461.10** | ₹6,468.59 | +₹3,046.41 | ₹7.49 | STABLE |
+
+"Ranking" reports whether `Oracle >= O1 >= Baseline` actually held in that scenario - it is computed, not asserted. Zero safety violations and zero per-event dominance violations in all twelve.
+
+**Ground-truth robustness** is the sharpest test here: it weakens or strengthens the hidden contextual interactions the model was trained to exploit, without retraining. O1's advantage shrinks when the structure it learned is halved (+₹501.30 vs +₹681.80) and grows when it is amplified - the policy tracks the environment rather than depending on one exact simulator parameterization.
 
 ---
 
 ## Recovery Operations Dashboard
 
 The React 18 + TypeScript 5 + Vite 5 frontend console provides:
-1. **Overview**: Executive pitch summary, SNIPS EV uplift, and 0% vs 84.21% safety ablation visual chart.
+1. **Overview**: Executive summary, net EV uplift, and the safety-gate ablation comparison - all read live from `GET /reports/summary`.
 2. **Payment Queue**: Interactive synthetic failure episodes table with filters.
 3. **Decision Inspector**: Real-time `POST /decide` and `POST /execute` testing with evidence rationale.
 4. **Audit Trail**: Searchable immutable decision record lookup (`GET /audit/{id}`).
-5. **Evaluation**: Comprehensive off-policy SNIPS and Oracle benchmark charts.
+5. **Evaluation**: Direct ground-truth benchmark, SNIPS estimator with confidence intervals, ablation and robustness matrix - rendered from the generated evaluation artifacts, never from hardcoded constants.
 
 ---
 
@@ -164,13 +213,27 @@ The React 18 + TypeScript 5 + Vite 5 frontend console provides:
 - Node.js v18+ / v22+
 - Dependencies listed in `requirements.txt` and `frontend/package.json`
 
-### 2. Start FastAPI Backend Service
+### 2. Generate the dataset and train the model
+
+The dataset and the serialized model are **not** committed (see `.gitignore`); they are regenerated
+deterministically. Both steps are required before the API, demo or tests will run.
+
 ```bash
-# From repository root
+# From repository root - deterministic (seed 42), verified against data/synthetic/checksums.json
+python src/data/generate_synthetic.py --config configs/synthetic_config.yaml --events 100000 --outdir data/synthetic
+python scripts/train_recovery_model.py
+
+# Optional: regenerate the evaluation artifacts the dashboard reads
+python scripts/evaluate_policy.py
+python scripts/run_robustness.py
+```
+
+### 3. Start FastAPI Backend Service
+```bash
 uvicorn src.api.app:app --reload --port 8000
 ```
 
-### 3. Start Operations Dashboard
+### 4. Start Operations Dashboard
 ```bash
 # From frontend directory
 cd frontend
@@ -202,10 +265,15 @@ For full reviewer pitch instructions, refer to [`docs/DEMO.md`](file:///c:/Users
 
 ## Limitations
 
-1. **Synthetic Environment**: Recovery outcomes are synthetic simulations designed to prevent circular evaluation.
-2. **Modeled Cost Parameters**: Action costs and friction penalties are parameter model assumptions.
+1. **Synthetic Environment**: Recovery outcomes are synthetic simulations designed to prevent circular evaluation. Nothing here is a measurement of Razorpay production performance.
+2. **Modeled Cost Parameters**: Action costs and friction penalties are parameter model assumptions, not observed fee contracts.
 3. **Simulated Execution**: The executor does not perform real-world payment gateway money movement.
-4. **In-Memory Store**: Audit records are persisted in a thread-safe in-memory store suitable for prototypes.
+4. **In-Memory Store**: Audit records live in a thread-safe in-memory store suitable for prototypes; they do not survive a restart.
+5. **The baseline is close to the data-generating policy.** The deterministic baseline agrees with the historical logging heuristic on ~88% of episodes, and the simulator's hidden interactions were designed to be invisible to that heuristic. Beating it shows the pipeline recovers known structure; it is not evidence of an edge over a real production policy.
+6. **Near-oracle efficiency is partly structural.** Every hidden interaction is a deterministic function of features the model already receives, so there is no unobserved confounding and no irreducible heterogeneity. A well-specified learner should approach the oracle here; 99.87% efficiency characterizes the environment as much as the method.
+7. **The "temporal" split carries no temporal structure.** Timestamps are drawn i.i.d. and then sorted, so the chronological split is statistically equivalent to a random one. It does not test drift.
+8. **No authentication.** The API has no authN/authZ and is not deployable as-is. The executor binds decisions to payments and rejects replays, but that is decision integrity, not access control.
+9. **SNIPS is imprecise at this coverage.** ESS is 11.5% of N and the 95% interval spans roughly ±₹390. It corroborates the direct benchmark; it cannot carry a headline on its own.
 
 ---
 
@@ -245,5 +313,6 @@ Razorpay/
 │   ├── evaluation/                    # Off-policy IPS engine & Task 12 robustness
 │   ├── models/                        # RecoveryPredictor & preprocessing
 │   └── policy/                        # PolicyAdvisor & Baseline policy
-└── tests/                             # 53 unit tests across 8 test suites
+├── requirements-lock.txt              # Exact verified dependency versions
+└── tests/                             # 83 unit tests across 9 test suites
 ```

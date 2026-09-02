@@ -27,12 +27,12 @@ npm run dev
 
 ## 2. Step-by-Step 60-Second Demo Walkthrough
 
-### Step 1: System Overview & Economic Value (+56.8% Uplift)
+### Step 1: System Overview & Economic Value (+40.78% Uplift)
 - Open `http://localhost:5173`.
 - **Observe**: Top metric cards showing:
-  - **O1 Policy Expected Value (SNIPS)**: **₹2,425.91 / event**
-  - **Baseline Policy Expected Value (SNIPS)**: **₹1,546.59 / event**
-  - **Net Economic Uplift**: **+56.8% (+₹879.32 / event)**
+  - **O1 Policy Expected Value (direct simulator)**: **₹2,353.54 / event**
+  - **Baseline Policy Expected Value (direct simulator)**: **₹1,671.74 / event**
+  - **Net Economic Uplift**: **+40.78% (+₹681.80 / event)**, measured on all 15,000 held-out episodes
 - **Observe**: Persistent Tier C Synthetic Environment disclosure banner.
 
 ### Step 2: Ingest & Filter Failed Payments
@@ -60,11 +60,11 @@ npm run dev
 - **Observe**: Complete candidate evaluation matrix showing probabilities and net EV across all 5 candidate actions (`retry_now`, `retry_later`, `switch_method`, `update_information`, `do_nothing`).
 - Toggle **"View Raw JSON"** to view the immutable audit payload.
 
-### Step 6: Review Safety Gate Ablation Finding (0.00% vs 84.21%)
+### Step 6: Review Safety Gate Ablation Finding (0.00% vs 83.23%)
 - Click **"Overview"** or **"Evaluation Metrics"** tab.
 - **Observe**: Safety Gate Architectural Guarantee:
   - **Full O1 Architecture**: **0.00% Safety Violations** (0 / 15,000 episodes).
-  - **Without Safety Gate (Ablation A3)**: **84.21% Safety Violations** (12,632 illegal action attempts).
+  - **Without Safety Gate (Ablation A3)**: **83.23% constraint breaches** (12,485 episodes). Note this variant also scores ~₹101/event *higher* on simulated EV - the gate is a compliance cost, and we say so.
 - **Finding**: Proves that unconstrained economic optimization without Safety Gate filtering causes severe compliance breaches by prompting users during technical bank outages.
 
 ---

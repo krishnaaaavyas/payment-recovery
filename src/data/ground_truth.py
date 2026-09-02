@@ -8,9 +8,23 @@ import numpy as np
 from scipy.special import expit  # Sigmoid function
 from typing import Dict, Any, Tuple
 
-def compute_true_recovery_probability(context: Dict[str, Any], action: str) -> float:
+def compute_true_recovery_probability(
+    context: Dict[str, Any],
+    action: str,
+    interaction_scale: float = 1.0
+) -> float:
     """
-    Computes hidden ground-truth p_true = P(recovery | X, action) using logit model.
+    Computes hidden ground-truth p_true = P(recovery | X, action) using a logit model.
+
+    interaction_scale multiplies the five HIDDEN CONTEXTUAL INTERACTION terms
+    (PSU night maintenance, cross-border corridor, UPI peak-hour, high-amount
+    friction, stale-info alignment) while leaving the base action logit, the
+    failure-category effect, retry decay and the customer-history signal untouched.
+
+    scale = 1.0 reproduces the environment the dataset was generated under and is
+    the default, so ordinary callers are unaffected. Other values are used only by
+    the Task 12 ground-truth robustness experiment, which asks whether the policy's
+    advantage depends on the strength of the interactions it was trained to exploit.
     """
     cat = context.get("failure_category", "")
     payment_method = context.get("payment_method", "")
@@ -48,24 +62,27 @@ def compute_true_recovery_probability(context: Dict[str, Any], action: str) -> f
         "upi_decline": -0.3
     }
     logit += cat_effects.get(cat, 0.0)
-    
+
+    # Interaction terms accumulate separately so they can be scaled as a group.
+    interaction_logit = 0.0
+
     # 3. HIDDEN INTERACTION 1: PSU Bank Night Maintenance (23:00 - 04:00)
     # Baseline doesn't know PSU banks perform batch processing at night.
     # retry_now fails miserably; retry_later (next morning) or switch_method succeeds.
     is_night = (hour >= 23 or hour <= 4)
     if issuer_cat == "psu_bank" and is_night:
         if action == "retry_now":
-            logit -= 2.5
+            interaction_logit -= 2.5
         elif action in ["retry_later", "switch_method"]:
-            logit += 1.5
+            interaction_logit += 1.5
             
     # 4. HIDDEN INTERACTION 2: Cross-Border Card Corridor
     # International payments have high 3DS friction & risk checks.
     if corridor.startswith("cross_border"):
         if action == "retry_now":
-            logit -= 1.2
+            interaction_logit -= 1.2
         elif action in ["switch_method", "update_information"]:
-            logit += 1.0
+            interaction_logit += 1.0
             
     # 5. HIDDEN INTERACTION 3: UPI Peak-Hour Timeout (18:00 - 21:00)
     # During evening peak hours, NPCI queue fills up. retry_now causes cascade timeout.
@@ -73,27 +90,30 @@ def compute_true_recovery_probability(context: Dict[str, Any], action: str) -> f
     is_peak = (18 <= hour <= 21)
     if payment_method.startswith("upi") and cat in ["upi_timeout", "network_timeout"] and is_peak:
         if action == "retry_now":
-            logit -= 1.8
+            interaction_logit -= 1.8
         elif action in ["retry_later", "switch_method"]:
-            logit += 1.4
+            interaction_logit += 1.4
             
     # 6. HIDDEN INTERACTION 4: High Amount (> ₹10,000) Friction & Verification
     # High value payments need explicit user updates or method switch, simple retries fail due to balance/limits.
     if amount > 10000.0:
         if action in ["update_information", "switch_method"]:
-            logit += 0.8
+            interaction_logit += 0.8
         elif action == "retry_now":
-            logit -= 0.6
+            interaction_logit -= 0.6
             
     # 7. HIDDEN INTERACTION 5: Stale Info alignment
     if cat in ["expired_card", "invalid_information"]:
         if action == "update_information":
-            logit += 3.0
+            interaction_logit += 3.0
         elif action == "switch_method":
-            logit += 2.0
+            interaction_logit += 2.0
         else:
-            logit -= 3.0
+            interaction_logit -= 3.0
             
+    # Apply the interaction scale as a group (1.0 = the generated environment).
+    logit += interaction_scale * interaction_logit
+
     # 8. Retry Decay: Each previous retry reduces recovery chance
     logit -= 0.4 * retry_count
     

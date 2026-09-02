@@ -112,22 +112,17 @@ def get_evaluation_reports():
     """
     Returns Task 11 and Task 12 evaluation metrics JSON objects for dashboard evaluation view.
     """
-    task11_path = os.path.join(repo_root, "reports/task11_policy_evaluation.json")
-    task12_path = os.path.join(repo_root, "reports/task12_robustness.json")
-    
-    task11_data = {}
-    if os.path.exists(task11_path):
-        with open(task11_path, "r") as f:
-            task11_data = json.load(f)
-            
-    task12_data = {}
-    if os.path.exists(task12_path):
-        with open(task12_path, "r") as f:
-            task12_data = json.load(f)
-            
+    def _load(rel_path):
+        full = os.path.join(repo_root, rel_path)
+        if not os.path.exists(full):
+            return {}
+        with open(full, "r") as f:
+            return json.load(f)
+
     return {
-        "task11_policy_evaluation": task11_data,
-        "task12_robustness": task12_data
+        "task11_model_results": _load("reports/task11_model_results.json"),
+        "task11_policy_evaluation": _load("reports/task11_policy_evaluation.json"),
+        "task12_robustness": _load("reports/task12_robustness.json"),
     }
 
 

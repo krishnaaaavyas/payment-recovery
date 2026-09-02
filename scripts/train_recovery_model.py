@@ -18,7 +18,10 @@ def main():
     print("Loading datasets...")
     df_train = pd.read_csv("data/synthetic/train.csv")
     df_val = pd.read_csv("data/synthetic/val.csv")
-    
+    # The chronologically-latest split. It is used ONCE, after model selection is
+    # complete, to produce held-out metrics. It is never used for selection.
+    df_test = pd.read_csv("data/synthetic/test.csv")
+
     candidates = [
         ("logistic_regression", False),
         ("logistic_regression", True),
@@ -51,23 +54,43 @@ def main():
             best_predictor = predictor
             best_name = name
             
+    # ------------------------------------------------------------------
+    # Held-out evaluation. Model selection above used ONLY the validation split;
+    # the test split is scored once, here, after selection is frozen. Reporting
+    # validation metrics as test metrics overstates held-out performance because
+    # the same split chose the winner (TASK_16A audit, finding M-4).
+    # ------------------------------------------------------------------
+    train_metrics = best_predictor.evaluate(df_train)
+    test_metrics = best_predictor.evaluate(df_test)
+
     print(f"\n========================================================")
     print(f"  SELECTED OPTIMAL MODEL: {best_name}")
-    print(f"  Validation Brier Score: {results[best_name]['brier_score']:.4f}")
-    print(f"  Validation Log Loss:    {results[best_name]['log_loss']:.4f}")
-    print(f"  Validation ROC AUC:     {results[best_name]['roc_auc']:.4f}")
+    print(f"  (selected on VALIDATION split; test split held out)")
+    print(f"  --------------------------------------------------")
+    print(f"  Train      ROC AUC {train_metrics['roc_auc']:.4f} | Brier {train_metrics['brier_score']:.4f} | LogLoss {train_metrics['log_loss']:.4f}")
+    print(f"  Validation ROC AUC {results[best_name]['roc_auc']:.4f} | Brier {results[best_name]['brier_score']:.4f} | LogLoss {results[best_name]['log_loss']:.4f}   <- selection split")
+    print(f"  TEST       ROC AUC {test_metrics['roc_auc']:.4f} | Brier {test_metrics['brier_score']:.4f} | LogLoss {test_metrics['log_loss']:.4f}   <- HEADLINE (held out)")
     print(f"========================================================\n")
-    
+
     # Save model
     model_path = "models/recovery_predictor.joblib"
     best_predictor.save(model_path)
     print(f"Saved optimal RecoveryPredictor model to {model_path}")
-    
+
     # Save results JSON
     os.makedirs("reports", exist_ok=True)
     report_data = {
         "selected_model": best_name,
+        "selection_split": "validation",
+        "headline_split": "test",
+        "note": (
+            "validation_metrics were used to SELECT among candidates and are therefore "
+            "optimistically biased; test_metrics are the held-out figures and are the ones "
+            "to quote as model quality."
+        ),
+        "train_metrics": train_metrics,
         "validation_metrics": results[best_name],
+        "test_metrics": test_metrics,
         "all_candidate_metrics": results
     }
     with open("reports/task11_model_results.json", "w") as f:

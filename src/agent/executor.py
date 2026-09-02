@@ -40,7 +40,47 @@ class SimulatedRecoveryExecutor:
             }
             return False, res
 
-        # 2. Reject if action does not match approved action
+        # 2. Reject if the request is not bound to the payment the decision was made for.
+        # payment_id was previously accepted and echoed back without ever being compared
+        # to the audit record, so a decision could be executed against a different
+        # payment (TASK_16A audit, finding M-5).
+        record_payment_id = audit_record.get("payment_id")
+        if record_payment_id is not None and payment_id != record_payment_id:
+            res = {
+                "execution_id": exec_id,
+                "decision_id": decision_id,
+                "payment_id": payment_id,
+                "action": action,
+                "status": "rejected",
+                "message": (
+                    f"Execution rejected: payment_id '{payment_id}' does not match the "
+                    f"payment this decision was issued for."
+                ),
+                "timestamp": now_iso
+            }
+            return False, res
+
+        # 3. Reject replays. Each decision authorises exactly one execution attempt;
+        # without this check the same approval could dispatch unbounded retries, which
+        # is precisely what the bounded-agent retry cap exists to prevent.
+        prior_status = audit_record.get("execution_status", "pending")
+        if prior_status != "pending":
+            res = {
+                "execution_id": exec_id,
+                "decision_id": decision_id,
+                "payment_id": payment_id,
+                "action": action,
+                "status": "rejected",
+                "message": (
+                    f"Execution rejected: decision '{decision_id}' has already been "
+                    f"actioned (execution_status='{prior_status}'). Each decision "
+                    f"authorises a single execution."
+                ),
+                "timestamp": now_iso
+            }
+            return False, res
+
+        # 4. Reject if action does not match approved action
         if action != audit_record["selected_action"]:
             res = {
                 "execution_id": exec_id,
@@ -53,7 +93,7 @@ class SimulatedRecoveryExecutor:
             }
             return False, res
 
-        # 3. Reject if action is not in allowed bounded action set
+        # 5. Reject if action is not in allowed bounded action set
         if action not in ALL_ACTIONS:
             res = {
                 "execution_id": exec_id,
@@ -66,7 +106,7 @@ class SimulatedRecoveryExecutor:
             }
             return False, res
 
-        # 4. Reject if decision was stopped or escalated
+        # 6. Reject if decision was stopped or escalated
         decision_status = audit_record.get("status", "STOP")
         if decision_status == "STOP":
             res = {
@@ -94,7 +134,7 @@ class SimulatedRecoveryExecutor:
             self.store.update_execution_status(decision_id, "escalated")
             return False, res
 
-        # 5. Reject if action is not in safe actions list
+        # 7. Reject if action is not in safe actions list
         if action not in audit_record.get("safe_actions", []):
             res = {
                 "execution_id": exec_id,
@@ -108,7 +148,7 @@ class SimulatedRecoveryExecutor:
             self.store.update_execution_status(decision_id, "rejected")
             return False, res
 
-        # 6. Execute approved simulation
+        # 8. Execute approved simulation
         if action == "retry_now":
             exec_status = "executed"
             msg = "Simulated immediate retry successfully dispatched to gateway"

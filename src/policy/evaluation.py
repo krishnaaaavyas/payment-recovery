@@ -20,6 +20,46 @@ from src.data.economics import calculate_ev, get_action_cost, get_downside_penal
 from src.policy.advisor import PolicyAdvisor
 from src.policy.baseline import DeterministicBaselinePolicy
 
+def bootstrap_snips_ci(
+    matches: np.ndarray,
+    propensities: np.ndarray,
+    rewards: np.ndarray,
+    n_bootstraps: int = 2000,
+    seed: int = 0
+) -> Dict[str, float]:
+    """
+    Percentile bootstrap confidence interval for the SNIPS estimator.
+
+    Resamples events (not matched events) with replacement, so the uncertainty
+    reflects both which events land in the sample and which of them the logging
+    policy happened to match.
+    """
+    N = len(rewards)
+    weights = np.where(matches, 1.0 / propensities, 0.0)
+    if weights.sum() <= 0:
+        return {"point": 0.0, "ci_lower": 0.0, "ci_upper": 0.0, "std_error": 0.0, "n_bootstraps": 0}
+
+    point = float(np.sum(weights * rewards) / np.sum(weights))
+
+    rng = np.random.RandomState(seed)
+    draws = []
+    for _ in range(n_bootstraps):
+        idx = rng.randint(0, N, N)
+        w = weights[idx]
+        w_sum = w.sum()
+        if w_sum > 0:
+            draws.append(float(np.sum(w * rewards[idx]) / w_sum))
+
+    arr = np.array(draws)
+    return {
+        "point": float(np.round(point, 2)),
+        "ci_lower": float(np.round(np.percentile(arr, 2.5), 2)),
+        "ci_upper": float(np.round(np.percentile(arr, 97.5), 2)),
+        "std_error": float(np.round(arr.std(ddof=1), 2)),
+        "n_bootstraps": len(draws),
+    }
+
+
 def run_policy_evaluation(
     advisor: PolicyAdvisor,
     df_test_obs: pd.DataFrame,
@@ -169,34 +209,81 @@ def run_policy_evaluation(
         
         b_ips_ev = float(np.sum(b_weights * b_rewards) / N)
         b_snips_ev = float(np.sum(b_weights * b_rewards) / np.sum(b_weights))
+        b_ess = float((np.sum(b_weights) ** 2) / np.sum(b_weights ** 2))
     else:
-        b_ips_ev, b_snips_ev = 0.0, 0.0
+        b_ips_ev, b_snips_ev, b_ess = 0.0, 0.0, 0.0
         
     logged_mean_ev = float(np.mean(realized_logged_rewards))
-    
+
+    # Bootstrap confidence intervals for the SNIPS estimators. SNIPS is a
+    # high-variance estimator here (see effective sample size below), so a point
+    # estimate on its own is not an honest summary.
+    ml_snips_ci = bootstrap_snips_ci(ml_matches, propensities, realized_logged_rewards)
+    b_snips_ci = bootstrap_snips_ci(b_matches, propensities, realized_logged_rewards)
+
     # ----------------------------------------------------
-    # EVALUATION C — SYNTHETIC ORACLE BENCHMARK
+    # EVALUATION C — DIRECT GROUND-TRUTH SIMULATOR BENCHMARK
+    #
+    # This is the AUTHORITATIVE synthetic-policy benchmark: it evaluates every
+    # event in the population against the hidden simulator, rather than the
+    # propensity-matched subset SNIPS is restricted to.
+    #
+    # The merge is validated one-to-one: a many-to-one join silently duplicated
+    # events and a left join silently produced NaNs that were then dropped by
+    # nanmean, so the O1 mean and the oracle mean were computed over different
+    # populations (TASK_16A audit, finding C-1).
     # ----------------------------------------------------
-    df_merged_ora = df_eval.merge(df_test_oracle, on="event_id", how="left")
-    
-    oracle_true_ev_ml = []
-    oracle_true_ev_baseline = []
-    
-    for idx, row in df_merged_ora.iterrows():
-        ml_act = row["ml_action"]
-        b_act = row["baseline_action"]
-        
-        ora_ev_ml = row[f"SYNTHETIC_ORACLE_ONLY_true_ev_{ml_act}"]
-        ora_ev_b = row[f"SYNTHETIC_ORACLE_ONLY_true_ev_{b_act}"]
-        
-        oracle_true_ev_ml.append(ora_ev_ml)
-        oracle_true_ev_baseline.append(ora_ev_b)
-        
-    mean_oracle_best_ev = float(df_test_oracle["SYNTHETIC_ORACLE_ONLY_true_best_ev"].mean())
-    mean_oracle_baseline_ev = float(df_test_oracle["SYNTHETIC_ORACLE_ONLY_baseline_ev"].mean())
-    mean_oracle_ml_ev = float(np.nanmean(oracle_true_ev_ml))
+    assert df_test_oracle["event_id"].is_unique, (
+        "Oracle frame contains duplicate event_id values; cannot align one-to-one."
+    )
+    df_merged_ora = df_eval.merge(df_test_oracle, on="event_id", how="inner", validate="one_to_one")
+    assert len(df_merged_ora) == N, (
+        f"Oracle join changed the population: {len(df_merged_ora)} rows after merge, "
+        f"expected {N}. Observed and oracle frames are not aligned."
+    )
+
+    ml_act_arr = df_merged_ora["ml_action"].values
+    b_act_arr = df_merged_ora["baseline_action"].values
+
+    oracle_true_ev_ml = np.array([
+        df_merged_ora[f"SYNTHETIC_ORACLE_ONLY_true_ev_{a}"].values[i]
+        for i, a in enumerate(ml_act_arr)
+    ], dtype=float)
+    oracle_true_ev_baseline = np.array([
+        df_merged_ora[f"SYNTHETIC_ORACLE_ONLY_true_ev_{a}"].values[i]
+        for i, a in enumerate(b_act_arr)
+    ], dtype=float)
+    oracle_true_ev_best = df_merged_ora["SYNTHETIC_ORACLE_ONLY_true_best_ev"].values.astype(float)
+
+    # No NaN may survive: both policies are confined to the safe action set, and the
+    # oracle records a true EV for every safe action. A NaN here means an evaluated
+    # action was outside the safe set at generation time.
+    assert not np.isnan(oracle_true_ev_ml).any(), (
+        f"{int(np.isnan(oracle_true_ev_ml).sum())} events have no ground-truth EV for the "
+        f"O1 action; the policy selected an action outside the generated safe set."
+    )
+    assert not np.isnan(oracle_true_ev_baseline).any(), (
+        f"{int(np.isnan(oracle_true_ev_baseline).sum())} events have no ground-truth EV for "
+        f"the baseline action."
+    )
+    assert not np.isnan(oracle_true_ev_best).any(), "Oracle best EV contains NaN."
+
+    # Per-event dominance: the oracle takes the max over the same safe set the policy
+    # chooses from, so regret must be non-negative for EVERY event, not merely on
+    # average. This is checked directly rather than inferred from aggregate means.
+    per_event_regret = oracle_true_ev_best - oracle_true_ev_ml
+    dominance_violations = int(np.sum(per_event_regret < -1e-6))
+    assert dominance_violations == 0, (
+        f"{dominance_violations} events violate EV_true(O1) <= EV_true(oracle)."
+    )
+
+    mean_oracle_best_ev = float(np.mean(oracle_true_ev_best))
+    mean_oracle_baseline_ev = float(np.mean(oracle_true_ev_baseline))
+    mean_oracle_ml_ev = float(np.mean(oracle_true_ev_ml))
     regret = float(mean_oracle_best_ev - mean_oracle_ml_ev)
-    
+    policy_efficiency = float(mean_oracle_ml_ev / mean_oracle_best_ev) if mean_oracle_best_ev else 0.0
+    direct_uplift = mean_oracle_ml_ev - mean_oracle_baseline_ev
+
     # ----------------------------------------------------
     # ACTION & CONFIDENCE DISTRIBUTION METRICS
     # ----------------------------------------------------
@@ -217,22 +304,52 @@ def run_policy_evaluation(
             "mean_expected_ev_inr": float(np.round(np.mean(ml_expected_evs), 2)),
             "expected_recovered_gmv_inr": float(np.round(ml_expected_gmv, 2))
         },
-        "off_policy_ips_evaluation": {
+        "direct_ground_truth_benchmark": {
+            "role": "AUTHORITATIVE synthetic-policy benchmark — full population, hidden simulator.",
+            "disclaimer": "Synthetic environment only — not Razorpay production evidence.",
+            "events_evaluated": int(len(oracle_true_ev_ml)),
+            "events_in_population": N,
+            "events_missing_ground_truth": int(N - len(oracle_true_ev_ml)),
+            "direct_true_o1_policy_ev_inr": float(np.round(mean_oracle_ml_ev, 2)),
+            "direct_true_oracle_best_ev_inr": float(np.round(mean_oracle_best_ev, 2)),
+            "direct_true_baseline_policy_ev_inr": float(np.round(mean_oracle_baseline_ev, 2)),
+            "direct_true_regret_inr_per_event": float(np.round(regret, 4)),
+            "direct_policy_efficiency": float(np.round(policy_efficiency, 6)),
+            "direct_uplift_over_baseline_inr_per_event": float(np.round(direct_uplift, 2)),
+            "direct_uplift_over_baseline_pct": float(np.round(100.0 * direct_uplift / mean_oracle_baseline_ev, 2)),
+            "per_event_dominance_violations": dominance_violations,
+            "per_event_regret_min": float(np.round(float(np.min(per_event_regret)), 6)),
+            "per_event_regret_max": float(np.round(float(np.max(per_event_regret)), 2)),
+            "action_matches_oracle_best_rate": float(np.round(
+                float(np.mean(ml_act_arr == df_merged_ora["SYNTHETIC_ORACLE_ONLY_true_best_action"].values)), 4))
+        },
+        "off_policy_snips_evaluation": {
+            "role": "Off-policy estimator (deployment-style analogue) — NOT ground truth.",
+            "interpretation": (
+                "SNIPS estimates policy value from logged episodes where the target policy "
+                "happens to agree with the logging policy, reweighted by 1/e(a|X). It is "
+                "unbiased in expectation but high-variance at this coverage; the direct "
+                "ground-truth benchmark above is the authoritative value."
+            ),
             "logged_policy_realized_mean_ev_inr": float(np.round(logged_mean_ev, 2)),
             "baseline_policy_ips_ev_inr": float(np.round(b_ips_ev, 2)),
             "baseline_policy_snips_ev_inr": float(np.round(b_snips_ev, 2)),
+            "baseline_policy_snips_ci": b_snips_ci,
             "baseline_policy_coverage_rate": float(np.round(b_coverage, 4)),
+            "baseline_matched_events": b_match_count,
+            "baseline_effective_sample_size": float(np.round(b_ess, 1)),
             "ml_policy_ips_ev_inr": float(np.round(ml_ips_ev, 2)),
             "ml_policy_snips_ev_inr": float(np.round(ml_snips_ev, 2)),
+            "ml_policy_snips_ci": ml_snips_ci,
             "ml_policy_coverage_rate": float(np.round(ml_coverage, 4)),
-            "ml_effective_sample_size": float(np.round(ml_ess, 1))
-        },
-        "synthetic_oracle_benchmark": {
-            "disclaimer": "Synthetic oracle benchmark — not production evidence.",
-            "oracle_baseline_policy_ev_inr": float(np.round(mean_oracle_baseline_ev, 2)),
-            "oracle_ml_policy_ev_inr": float(np.round(mean_oracle_ml_ev, 2)),
-            "oracle_best_policy_ev_inr": float(np.round(mean_oracle_best_ev, 2)),
-            "oracle_policy_regret_inr": float(np.round(regret, 2))
+            "ml_matched_events": ml_match_count,
+            "ml_effective_sample_size": float(np.round(ml_ess, 1)),
+            "ml_effective_sample_size_fraction": float(np.round(ml_ess / N, 4)),
+            "min_logging_propensity": float(np.round(float(np.min(propensities)), 4)),
+            "max_importance_weight": float(np.round(float(np.max(1.0 / propensities)), 2)),
+            "weight_clipping_applied": False,
+            "snips_uplift_over_baseline_inr_per_event": float(np.round(ml_snips_ev - b_snips_ev, 2)),
+            "snips_minus_direct_true_ev_inr": float(np.round(ml_snips_ev - mean_oracle_ml_ev, 2))
         },
         "distributions": {
             "ml_action_distribution": {k: float(np.round(v, 4)) for k, v in ml_action_dist.items()},

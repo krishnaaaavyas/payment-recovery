@@ -40,8 +40,8 @@ Root README       Architecture     Demo Guide       5-Min Pitch       Pitch Deck
 
 - **Data Tier**: **TIER C — Public structural data + synthetic recovery environment**.
 - **Claim Sanitization**: Checked all documentation files for un-qualified claims. Replaced any unsupported phrases with exact scientific terminology:
-  - ❌ *"Recovered 56.8% more Razorpay revenue"*
-  - ✅ *"Achieved 56.8% higher synthetic estimated economic value (+₹879.32/event) than the baseline under our evaluation environment."*
+  - ❌ *"Recovered 40.78% more Razorpay revenue"*
+  - ✅ *"In our synthetic evaluation environment, O1 achieved 40.78% higher estimated economic value (+₹681.80/event) than the deterministic baseline."*
 - **Oracle Isolation**: Confirmed that oracle ground truth columns (`SYNTHETIC_ORACLE_ONLY_*`) and outcome fields (`recovered`, `recovery_timestamp`) remain strictly isolated from the production decision pipeline.
 
 ---

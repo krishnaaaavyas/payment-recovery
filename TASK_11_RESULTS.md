@@ -26,9 +26,9 @@ The core estimator models $P(\text{recovery} = 1 | X, \text{action})$ using 24 d
 | **Random Forest (d=10)** | Uncalibrated | 0.8400 | 0.4756 | 0.1616 | 0.0727 | Candidate |
 | **Random Forest (d=10)** | Calibrated (Sigmoid) | 0.8403 | 0.4693 | 0.1601 | 0.0459 | Candidate |
 | **HistGradientBoosting** | Uncalibrated | 0.8519 | 0.4441 | 0.1524 | 0.0206 | Candidate |
-| **HistGradientBoosting** | **Calibrated (Sigmoid)** | **0.8532** | **0.4420** | **0.1516** | **0.0130** | **SELECTED OPTIMAL** |
+| **HistGradientBoosting** | **Calibrated (Sigmoid)** | **0.8584** | **0.4384** | **0.1494** | **0.0166** | **SELECTED OPTIMAL** |
 
-**Selection Rationale**: `HistGradientBoosting (Calibrated)` achieved the lowest Brier Score (`0.1516`), lowest Log Loss (`0.4420`), highest ROC AUC (`0.8532`), and a low mean calibration error (`0.0130`).
+**Selection Rationale**: `HistGradientBoosting (Calibrated)` achieved the lowest Brier Score (`0.1494`), lowest Log Loss (`0.4384`), highest ROC AUC (`0.8584`), and a low mean calibration error (`0.0130`).
 
 ---
 
@@ -47,26 +47,46 @@ For any failure context $X$:
 
 ---
 
-## 5. Evaluation Results (Test Set: 15,000 Events)
+## 5. Evaluation Results (Held-Out Test Split: 15,000 Events)
 
-### Pillar A: Predictive Model Quality (Observed Actions)
-- **ROC AUC**: `0.8532`
+> **Split discipline.** The table in section 4 reports **validation** metrics: that split
+> selected the winning candidate, so those numbers are optimistically biased. The figures
+> below are the **held-out test** metrics, scored once after selection was frozen. Quote
+> these as model quality.
+
+### Pillar A: Predictive Model Quality (Held-Out Test Split)
+- **ROC AUC**: `0.8600`  *(validation, used for selection: `0.8584`)*
 - **Log Loss**: `0.4420`
-- **Brier Score**: `0.1516`
+- **Brier Score**: `0.1485`  *(validation, used for selection: `0.1494`)*
 - **Mean Calibration Error**: `0.0130`
 
-### Pillar B: Off-Policy IPS Evaluation (Propensity-Weighted Match)
-- **Logged Policy Realized Mean EV**: **₹1,555.19** / event
-- **Deterministic Baseline Policy SNIPS EV**: **₹1,546.59** / event (Coverage: 72.9%)
-- **O1 ML Policy SNIPS EV**: **₹2,425.91** / event (Coverage: 38.5%, ESS: 1,730.5)
-- **Off-Policy Uplift over Baseline**: **+₹879.32 / event** (+56.8% economic gain)
+### Pillar B: SNIPS Off-Policy Estimator (NOT ground truth)
 
-### Pillar C: Synthetic Oracle Benchmark (Ground-Truth Simulation)
-> *Explicit Disclaimer: Synthetic oracle benchmark — not production evidence.*
-- **Oracle Baseline Policy EV**: **₹1,668.04** / event
-- **Oracle O1 ML Policy EV**: **₹2,349.72** / event
-- **Oracle Best Policy EV**: **₹2,350.67** / event
-- **Oracle Policy Regret**: **₹0.94 / event** (Near-zero regret relative to oracle optimum)
+> SNIPS estimates policy value only from logged episodes where the target policy agrees
+> with the historical policy. It is the deployment-style analogue - what a real rollout
+> would have to rely on before running an experiment - but it uses a fraction of the data
+> and carries wide uncertainty. Pillar C below is the authoritative benchmark.
+
+- **Logged Policy Realized Mean EV**: **₹1,596.19** / event
+- **Deterministic Baseline Policy SNIPS EV**: **₹1,676.60** / event (Coverage: 72.71%, ESS: 5,333.6, 95% CI ₹1,567.68-₹1,785.87)
+- **O1 ML Policy SNIPS EV**: **₹2,415.74** / event (Coverage: 37.80%, ESS: 1,724.6, 95% CI ₹2,088.89-₹2,861.67)
+- **Overlap diagnostics**: min logging propensity `0.075`, max importance weight `13.33`, no clipping applied
+- **SNIPS minus direct true EV**: **+₹62.20** - estimator variance, **not** additional recovered value (well under one standard error of ₹201.53)
+
+### Pillar C: Direct Ground-Truth Simulator Benchmark (AUTHORITATIVE)
+> *Explicit Disclaimer: synthetic simulator benchmark - not production evidence.*
+
+Every episode is scored against the hidden simulator. No matched subset, no importance
+weights, no dropped rows.
+
+- **Episodes scored**: **15,000 / 15,000** (0 missing ground truth)
+- **Deterministic Baseline Policy EV**: **₹1,671.74** / event
+- **O1 Economic Policy EV**: **₹2,353.54** / event
+- **Oracle Best Achievable EV**: **₹2,356.66** / event
+- **Net Uplift over Baseline**: **+₹681.80 / event (+40.78%)**
+- **Policy Regret**: **₹3.12 / event** (99.87% of the oracle ceiling)
+- **Per-event dominance violations**: **0** - `EV_true(O1) <= EV_true(oracle)` verified on every individual episode, not merely on average
+- **Action matches oracle-best action**: 96.85%
 
 ### Pillar D: Safety Gate Enforcement
 - **Safety Violation Count**: `0`
@@ -76,13 +96,20 @@ For any failure context $X$:
 
 ## 6. Action Selection Distribution
 
+Read directly from `reports/task11_policy_evaluation.json` and `reports/task12_robustness.json`.
+
 | Action | Logged Policy Share (%) | Deterministic Baseline Share (%) | O1 ML Policy Advisor Share (%) |
 | :--- | :---: | :---: | :---: |
-| `retry_now` | 24.2% | 34.6% | 21.8% |
-| `retry_later` | 24.5% | 36.2% | 41.2% |
-| `switch_method` | 13.2% | 4.0% | 18.5% |
-| `update_information` | 11.5% | 15.0% | 7.8% |
-| `do_nothing` | 26.5% | 10.2% | 10.7% |
+| `retry_now` | 23.71% | 38.89% | 0.04% |
+| `retry_later` | 24.87% | 27.39% | 2.47% |
+| `switch_method` | 13.09% | 3.98% | 67.85% |
+| `update_information` | 11.51% | 14.33% | 14.23% |
+| `do_nothing` | 26.82% | 15.41% | 15.41% |
+
+O1 concentrates on `switch_method` because the simulator's hidden interactions (PSU night
+maintenance, UPI peak-hour congestion, cross-border 3DS friction, high-value verification)
+all reward switching the instrument over retrying the same one. The deterministic baseline,
+which reads only the decline code, cannot see any of that.
 
 ---
 
@@ -107,5 +134,5 @@ Generated plots are saved under [`reports/figures/`](file:///c:/Users/admin/Docu
 ## 9. Conclusion
 The Task 11 implementation proves that:
 1. An ML model can accurately learn complex, non-linear contextual payment recovery probability functions ($P(\text{recovery}|X,a)$) without feature leakage or circular labels.
-2. An Expected Economic Value policy advisor under strict safety pre-filtering delivers substantial economic improvement over a competent deterministic rules baseline (+₹879.32/event under SNIPS off-policy evaluation, and near-zero regret ₹0.94/event in oracle simulation).
+2. An Expected Economic Value policy advisor under strict safety pre-filtering delivers a substantial economic improvement over a deterministic rules baseline in this synthetic environment: **+₹681.80/event (+40.78%)** measured directly against the simulator across all 15,000 episodes, with **₹3.12/event** regret against the oracle ceiling. The SNIPS estimator independently corroborates the direction (+₹739.14/event) with a wide interval.
 3. The system maintains 100% safety compliance while dynamically allocating recovery actions according to context-specific expected economics.
