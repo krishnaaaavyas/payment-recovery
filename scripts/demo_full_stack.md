@@ -23,13 +23,14 @@
 
 #### Terminal 1: Start FastAPI Backend Service
 ```bash
-# Directory: C:\Users\admin\Documents\Razorpay
+# From the repository root
 uvicorn src.api.app:app --reload --port 8000
 ```
 
 #### Terminal 2: Start React Operations Dashboard
 ```bash
-# Directory: C:\Users\admin\Documents\Razorpay\frontend
+# From the frontend directory
+cd frontend
 npm run dev
 ```
 Open browser at `http://localhost:5173`.

@@ -265,7 +265,7 @@ Run the command-line demo script:
 python scripts/demo_agent.py
 ```
 
-For full reviewer pitch instructions, refer to [`docs/DEMO.md`](file:///c:/Users/admin/Documents/Razorpay/docs/DEMO.md) and [`docs/PITCH_5_MINUTES.md`](file:///c:/Users/admin/Documents/Razorpay/docs/PITCH_5_MINUTES.md).
+For full reviewer pitch instructions, refer to [`docs/DEMO.md`](docs/DEMO.md) and [`docs/PITCH_5_MINUTES.md`](docs/PITCH_5_MINUTES.md).
 
 ---
 

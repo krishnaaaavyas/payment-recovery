@@ -11,14 +11,15 @@ Ensure **Python 3.11+** and **Node.js v18+ / v22+** are installed.
 
 ### Terminal 1: Launch FastAPI Backend Service
 ```bash
-# Workspace root: C:\Users\admin\Documents\Razorpay
+# Run from the repository root
 uvicorn src.api.app:app --reload --port 8000
 ```
 *Health Check*: Open `http://localhost:8000/health` (should return `{"status": "ok", ...}`).
 
 ### Terminal 2: Launch Operations Dashboard
 ```bash
-# Frontend directory: C:\Users\admin\Documents\Razorpay\frontend
+# From the frontend directory
+cd frontend
 npm run dev
 ```
 *Dashboard URL*: Open `http://localhost:5173` in your browser.

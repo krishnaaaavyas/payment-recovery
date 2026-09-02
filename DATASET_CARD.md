@@ -30,9 +30,9 @@ It enables:
 
 | Split | Event Count | Date Range | File Name |
 | :--- | :--- | :--- | :--- |
-| **Train** | 70,000 | 2026-06-01 to 2026-08-03 | [`data/synthetic/train.csv`](file:///c:/Users/admin/Documents/Razorpay/data/synthetic/train.csv) |
-| **Validation** | 15,000 | 2026-08-03 to 2026-08-17 | [`data/synthetic/val.csv`](file:///c:/Users/admin/Documents/Razorpay/data/synthetic/val.csv) |
-| **Test** | 15,000 | 2026-08-17 to 2026-08-30 | [`data/synthetic/test.csv`](file:///c:/Users/admin/Documents/Razorpay/data/synthetic/test.csv) |
+| **Train** | 70,000 | 2026-06-01 to 2026-08-03 | [`data/synthetic/train.csv`](data/synthetic/train.csv) |
+| **Validation** | 15,000 | 2026-08-03 to 2026-08-17 | [`data/synthetic/val.csv`](data/synthetic/val.csv) |
+| **Test** | 15,000 | 2026-08-17 to 2026-08-30 | [`data/synthetic/test.csv`](data/synthetic/test.csv) |
 
 ---
 
