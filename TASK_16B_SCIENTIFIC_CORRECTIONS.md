@@ -774,7 +774,7 @@ See §4 for the change description per file. Full list, 30 files:
 ## 19. Git commit
 
 ```
-Commit:  __COMMIT_HASH__
+Commit:  7816819c77851f1d1158ff8dfa3a360d8b7679ca (short: 7816819)
 Branch:  audit/task16b-scientific-corrections
 Message: fix: correct scientific evaluation and safety audit findings
 ```
