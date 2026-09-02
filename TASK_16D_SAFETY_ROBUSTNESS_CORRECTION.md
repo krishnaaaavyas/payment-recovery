@@ -357,7 +357,7 @@ This task did **not**:
 ## 13. Git commit
 
 ```
-Commit:  __COMMIT__
+Commit:  9bef215f4ef68e702d82e301626710e7ade58885 (short: 9bef215)
 Branch:  audit/task16d-shifted-safety-fixes
 Message: fix: correct shifted safety evaluation and residual claims
 ```
@@ -369,7 +369,8 @@ One commit. Nothing pushed, no remote configured, `main` untouched, history not 
 ## 14. Working tree status
 
 ```
-__STATUS__
+On branch audit/task16d-shifted-safety-fixes
+nothing to commit, working tree clean
 ```
 
 ---
