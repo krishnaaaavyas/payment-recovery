@@ -15,6 +15,7 @@ models/*.joblib
 task-*.log
 .env
 .env.*
+!.env.example
 
 # IDE & OS temporary files
 .vscode/
