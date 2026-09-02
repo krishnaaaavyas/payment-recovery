@@ -119,21 +119,34 @@ The trained Task 11 model was evaluated against 4 environment shifts without ret
 | Shift Scenario | Shift Description | ML EV (₹) | Baseline EV (₹) | Oracle EV (₹) | ML Uplift over Baseline (₹) | Regret (₹) |
 | :--- | :--- | :---: | :---: | :---: | :---: | :---: |
 | **SHIFT_TRANSACTION_VALUE** | Amount 3.0x multiplier | ₹7,516.64 | ₹4,914.61 | ₹7,521.71 | **+₹2,602.03** | ₹5.08 |
-| **SHIFT_FAILURE_MIX** | Soft declines shifted to 60% | ₹2,483.54 | ₹1,380.30 | ₹2,487.83 | **+₹1,103.24** | ₹4.29 |
-| **SHIFT_PAYMENT_METHOD_MIX** | UPI share shifted to 70% | ₹2,359.09 | ₹1,659.93 | ₹2,362.06 | **+₹699.16** | ₹2.96 |
-| **SHIFT_COMBINED** | Amount 2.5x + Soft 50% + UPI 60% | ₹6,461.10 | ₹3,414.69 | ₹6,468.59 | **+₹7.49** | ₹7.49 |
+| **SHIFT_FAILURE_MIX** | Soft declines shifted to 60% | ₹2,657.82 | ₹1,626.02 | ₹2,659.05 | **+₹1,031.80** | ₹1.23 |
+| **SHIFT_PAYMENT_METHOD_MIX** | UPI share shifted to 70% | ₹2,359.09 | ₹1,659.93 | ₹2,362.06 | **+₹699.17** | ₹2.96 |
+| **SHIFT_COMBINED** | Amount 2.5x + Soft 50% + UPI 60% | ₹6,859.09 | ₹3,894.14 | ₹6,861.53 | **+₹2,964.94** | ₹2.45 |
 
 **Key Finding**: Regret against the oracle stays within a few rupees per event under all four
 shifts, and the ranking holds in each. Note that the oracle ceiling itself moves with the shift,
 so the correct reading is "O1 stays close to the best achievable action in the shifted world",
-not "performance is unchanged".
+not "performance is unchanged". Both the ground truth and the Safety Gate are re-evaluated on
+the shifted context, so the reported zero safety violations are measured against the
+specification that actually applies after the shift.
 
-> **Correction notice.** An earlier revision computed these rows by applying the shift to the
-> model's input features while reading ground truth from the *unshifted* oracle CSV - scoring
-> the policy in one world against the truth of another. Ground truth is now recomputed from
-> the simulator on the shifted contexts, and taxonomy-derived fields (`error_source`,
-> `error_step`, `failure_code`, `order_value_tier`, `card_network`) are updated consistently
-> with the shift. See `TASK_16B_SCIENTIFIC_CORRECTIONS.md`.
+> **Correction notice (two revisions).** An earlier revision computed these rows by applying
+> the shift to the model's input features while reading ground truth from the *unshifted*
+> oracle CSV - scoring the policy in one world against the truth of another. Task 16B fixed
+> the ground-truth side and updated taxonomy-derived fields (`error_source`, `error_step`,
+> `failure_code`, `order_value_tier`, `card_network`) consistently with the shift.
+>
+> Task 16C then found that the **Safety Gate** was still stale: the evaluator read the
+> `safe_actions` column captured at generation time, so a category shift left the policy
+> choosing from the pre-shift safe set, and the violation counter compared against that same
+> stale set and could never register a breach. Measured on the pre-16D code: 2,281/15,000
+> rows stale under `SHIFT_FAILURE_MIX`, of which 1,327 permitted `update_information` where
+> the shifted specification forbids it, and 1,277 real violations went unreported.
+>
+> Task 16D recomputes `evaluate_safety_gate(shifted_context)` for every shifted row. The two
+> category-shifting scenarios above moved as a result; the other two are unchanged. Each row
+> now carries `safety_gate_recomputed_on_shifted_context: true` in the results JSON. See
+> `TASK_16D_SAFETY_ROBUSTNESS_CORRECTION.md`.
 
 ---
 

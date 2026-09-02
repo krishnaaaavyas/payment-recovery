@@ -10,6 +10,29 @@ from src.data.failure_taxonomy import FAILURE_TAXONOMY, ALL_ACTIONS
 # Anything outside it is unrecognized and must fail CLOSED (Rule 0).
 SUPPORTED_FAILURE_CATEGORIES = frozenset(FAILURE_TAXONOMY.keys())
 
+
+def _is_valid_retry_count(value: Any) -> bool:
+    """
+    True only for a well-formed, non-negative, integral attempt count.
+
+    Rejects NaN (which would silently bypass the retry cap because every NaN
+    comparison is False), None and strings (which would raise), negatives, and
+    non-integral floats. numpy integer/float scalars are accepted when integral,
+    since the generator and evaluation frames supply those.
+    """
+    if isinstance(value, str) or value is None:
+        return False
+    try:
+        as_int = int(value)
+    except (TypeError, ValueError, OverflowError):   # None, NaN, +/-inf, non-numeric
+        return False
+    if as_int < 0:
+        return False
+    try:
+        return bool(as_int == value)         # rejects 3.9; accepts 3.0 and np.int64(3)
+    except Exception:
+        return False
+
 def evaluate_safety_gate(context: Dict[str, Any]) -> Tuple[List[str], List[str]]:
     """
     Returns (safe_actions, constraints_applied).
@@ -44,7 +67,19 @@ def evaluate_safety_gate(context: Dict[str, Any]) -> Tuple[List[str], List[str]]
         constraints_applied.append(f"HARD_SAFETY_NON_RETRYABLE_{cat.upper()}")
         return ["do_nothing"], constraints_applied
     
-    # Rule 2: Retry Count Cap Exceeded (Max 3 retries)
+    # Rule 2a: DEFAULT DENY - malformed attempt count.
+    # Rule 2b below is a numeric comparison, and a malformed value silently defeats it:
+    # NaN makes every comparison False so the cap is bypassed entirely, while a str or
+    # None raises TypeError. Neither may be allowed to widen the action set, so any
+    # value that is not a well-formed non-negative integer fails closed
+    # (TASK_16C audit, finding NEW-3).
+    if isinstance(retry_count, bool) or not _is_valid_retry_count(retry_count):
+        constraints_applied.append("HARD_SAFETY_INVALID_RETRY_COUNT")
+        return ["do_nothing"], constraints_applied
+
+    retry_count = int(retry_count)
+
+    # Rule 2b: Retry Count Cap Exceeded (Max 3 retries)
     if retry_count >= 3:
         constraints_applied.append("HARD_SAFETY_RETRY_CAP_EXCEEDED")
         return ["do_nothing"], constraints_applied

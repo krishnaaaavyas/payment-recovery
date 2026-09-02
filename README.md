@@ -185,11 +185,21 @@ Task 12 re-scores the **frozen** policy across 6 economic perturbations, 3 groun
 | **Ground truth - weaker interactions (0.5x)** | ₹1,565.17 | **₹2,066.47** | ₹2,069.58 | +₹501.30 | ₹3.12 | STABLE |
 | **Ground truth - stronger interactions (1.5x)** | ₹1,678.18 | **₹2,481.09** | ₹2,483.44 | +₹802.91 | ₹2.35 | STABLE |
 | **Shift - transaction value 3.0x** | ₹4,914.61 | **₹7,516.64** | ₹7,521.71 | +₹2,602.03 | ₹5.08 | STABLE |
-| **Shift - failure mix (60% soft decline)** | ₹1,380.30 | **₹2,483.54** | ₹2,487.83 | +₹1,103.24 | ₹4.29 | STABLE |
-| **Shift - payment mix (70% UPI)** | ₹1,659.93 | **₹2,359.09** | ₹2,362.06 | +₹699.16 | ₹2.96 | STABLE |
-| **Shift - combined** | ₹3,414.69 | **₹6,461.10** | ₹6,468.59 | +₹3,046.41 | ₹7.49 | STABLE |
+| **Shift - failure mix (60% soft decline)** | ₹1,626.02 | **₹2,657.82** | ₹2,659.05 | +₹1,031.80 | ₹1.23 | STABLE |
+| **Shift - payment mix (70% UPI)** | ₹1,659.93 | **₹2,359.09** | ₹2,362.06 | +₹699.17 | ₹2.96 | STABLE |
+| **Shift - combined** | ₹3,894.14 | **₹6,859.09** | ₹6,861.53 | +₹2,964.94 | ₹2.45 | STABLE |
 
-"Ranking" reports whether `Oracle >= O1 >= Baseline` actually held in that scenario - it is computed, not asserted. Zero safety violations and zero per-event dominance violations in all twelve.
+"Ranking" reports whether `Oracle >= O1 >= Baseline` actually held in that scenario - it is
+computed, not asserted.
+
+**On safety violations in this table.** Every scenario above constrains the policy to
+`evaluate_safety_gate(context)` evaluated on the *perturbed* context, and each reports zero
+violations against that specification. This is a statement about the safety-gated policy under
+perturbation; it is not a claim that the system is violation-free in general. Two separate
+results say otherwise and are reported as they stand: the deliberately unconstrained ablation
+(A3) breaches the action constraints on 83.23% of episodes, and before Task 16D the
+distribution-shift scenarios measured violations against a stale pre-shift safe set, which hid
+1,277 real breaches under `SHIFT_FAILURE_MIX` (see `TASK_16D_SAFETY_ROBUSTNESS_CORRECTION.md`).
 
 **Ground-truth robustness** is the sharpest test here: it weakens or strengthens the hidden contextual interactions the model was trained to exploit, without retraining. O1's advantage shrinks when the structure it learned is halved (+₹501.30 vs +₹681.80) and grows when it is amplified - the policy tracks the environment rather than depending on one exact simulator parameterization.
 

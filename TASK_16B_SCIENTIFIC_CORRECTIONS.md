@@ -313,6 +313,14 @@ never fed a self-contradictory context vector:
 | Payment mix 70% UPI | ₹2,349.90 | ₹2,359.09 | ₹1.54 → ₹2.96 |
 | Combined | ₹5,896.19 | ₹6,461.10 | ₹3.39 → ₹7.49 |
 
+> **Superseded by Task 16D.** The "after" column above is the value Task 16B produced. Task 16C
+> subsequently found that the Safety Gate was still being read from the stale pre-shift
+> `safe_actions` column, so the two category-shifting rows were still wrong. After Task 16D
+> recomputes `evaluate_safety_gate(shifted_context)`, the current authoritative values are
+> `SHIFT_FAILURE_MIX` O1 ₹2,657.82 / regret ₹1.23 and `SHIFT_COMBINED` O1 ₹6,859.09 /
+> regret ₹2.45. See `TASK_16D_SAFETY_ROBUSTNESS_CORRECTION.md` and
+> `reports/task12_robustness.json`.
+
 The qualitative conclusion survives — regret stays small and the ranking holds — but the
 published numbers were wrong by up to ₹309/event under the old method, and the claim of
 "zero degradation" has been replaced with the accurate reading: the oracle ceiling itself

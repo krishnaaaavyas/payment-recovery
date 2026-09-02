@@ -67,7 +67,7 @@ Open browser at `http://localhost:5173`.
 - **Action**: Click **"Inspect Full Decision Audit Record"**. Show the 5-action probability/EV candidate evaluation matrix and toggle **"View Raw JSON"**.
 
 #### [01:55 - 02:15] 6. Scientific Evaluation Metrics
-- **Presenter**: *"Finally, our evaluation dashboard confirms model predictive quality (held-out test ROC AUC 0.8600, Brier Score 0.1485), near-zero theoretical oracle regret (₹0.94/event), and performance ranking stability across economic perturbations and distribution shifts."*
+- **Presenter**: *"Finally, our evaluation dashboard confirms model predictive quality (held-out test ROC AUC 0.8600, Brier Score 0.1485), near-zero direct-simulator oracle regret (₹3.12/event), and performance ranking stability across economic perturbations and distribution shifts."*
 - **Action**: Click **"Evaluation Metrics"** tab. Point out persistent Tier C synthetic evaluation disclosure.
 
 ---

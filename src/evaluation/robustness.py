@@ -125,10 +125,27 @@ def compute_bootstrap_ci(data: np.ndarray, n_bootstraps: int = 200, seed: int = 
         "ci_upper": float(np.round(ci_upper, 2))
     }
 
-def get_precomputed_safety_and_baseline(df: pd.DataFrame) -> Tuple[List[List[str]], List[str]]:
-    """Pre-computes safe actions list and baseline action list instantaneously."""
-    safe_actions_list = [s.split("|") for s in df["safe_actions"].values]
-    
+def compute_safety_and_baseline(df: pd.DataFrame) -> Tuple[List[List[str]], List[str]]:
+    """
+    Evaluates the Safety Gate against the contexts in `df` and derives the matching
+    deterministic-baseline action for each row.
+
+    The safe action set is ALWAYS recomputed from `evaluate_safety_gate(context)`.
+    It is never read back from the stored `safe_actions` column.
+
+    This function previously string-split `df["safe_actions"]`, which is a snapshot
+    taken at dataset-generation time. Under a distribution shift that mutates
+    `failure_category`, that snapshot no longer describes the context being
+    evaluated: the policy selected from a pre-shift safe set, and the violation
+    counter compared the selection against that same pre-shift set, so it could
+    never register a breach (TASK_16C audit, finding NEW-1). Recomputing here fixes
+    every call site at once and removes the whole class of defect.
+
+    On unshifted data this is a no-op: the stored column and the recomputed gate
+    agree on all 100,000 generated rows (asserted by the Task 16D regression suite).
+    """
+    safe_actions_list = [evaluate_safety_gate(ctx)[0] for ctx in df.to_dict(orient="records")]
+
     baseline_actions = []
     for safe_a, cat in zip(safe_actions_list, df["failure_category"].values):
         if "do_nothing" in safe_a and len(safe_a) == 1:
@@ -167,7 +184,7 @@ def run_economic_sensitivity(
     retry_counts = df_test_obs["retry_count_before_event"].values
     fail_cats = df_test_obs["failure_category"].values
     
-    safe_actions_list, baseline_actions = get_precomputed_safety_and_baseline(df_test_obs)
+    safe_actions_list, baseline_actions = compute_safety_and_baseline(df_test_obs)
 
     results = {}
 
@@ -289,7 +306,7 @@ def run_ablation_study(
             
         ev_matrix[:, a_idx] = (p_vec * amounts) - c_val - d_vec - f_val
         
-    safe_actions_list, baseline_actions = get_precomputed_safety_and_baseline(df_test_obs)
+    safe_actions_list, baseline_actions = compute_safety_and_baseline(df_test_obs)
 
     # Ground truth for ALL five actions on ALL rows, including actions the safety gate
     # forbids. A3 deliberately ignores the gate, so it selects forbidden actions on ~84%
@@ -423,19 +440,40 @@ def run_distribution_shifts(
                 
             ev_matrix[:, a_idx] = (p_vec * amounts) - c_val - d_vec - f_val
             
-        safe_actions_list, baseline_actions = get_precomputed_safety_and_baseline(df_shifted)
-        
+        # ------------------------------------------------------------------
+        # SAFETY GATE IS RE-EVALUATED ON THE SHIFTED CONTEXT.
+        #
+        # df_shifted is the shifted context X_shifted. Its `safe_actions` column is
+        # still the snapshot taken at generation time for the PRE-shift context, so
+        # it is refreshed here before use; nothing downstream may read the stale
+        # value. The policy may only choose from shifted_safe_actions, and the
+        # violation counter is checked against the same recomputed set.
+        # (TASK_16C audit, finding NEW-1.)
+        # ------------------------------------------------------------------
+        shifted_contexts = df_shifted.to_dict(orient="records")
+        shifted_safe_actions = [evaluate_safety_gate(ctx)[0] for ctx in shifted_contexts]
+        df_shifted["safe_actions"] = ["|".join(sa) for sa in shifted_safe_actions]
+        df_shifted["safety_constraints_applied"] = [
+            "|".join(evaluate_safety_gate(ctx)[1]) for ctx in shifted_contexts
+        ]
+
+        safe_actions_list, baseline_actions = compute_safety_and_baseline(df_shifted)
+        assert safe_actions_list == shifted_safe_actions, (
+            "Safety set used for the shifted decision does not match "
+            "evaluate_safety_gate(shifted_context)."
+        )
+
         ml_actions = []
         violations = 0
-        
+
         for i in range(N):
-            safe_a = safe_actions_list[i]
+            safe_a = shifted_safe_actions[i]
             safe_indices = [ALL_ACTIONS.index(a) for a in safe_a]
             safe_evs = [ev_matrix[i, idx] for idx in safe_indices]
-            
+
             rec_act = safe_a[int(np.argmax(safe_evs))]
             ml_actions.append(rec_act)
-            
+
             if rec_act not in safe_a:
                 violations += 1
                 
@@ -449,13 +487,16 @@ def run_distribution_shifts(
 
         ora_ml_arr = ora_ev_matrix[np.arange(N), ml_act_indices]
         ora_b_arr = ora_ev_matrix[np.arange(N), base_act_indices]
-        ora_best_arr = masked_oracle_best(ora_ev_matrix, safe_actions_list)
+        # Oracle ceiling is also taken over the SHIFTED safe set, so policy and oracle
+        # are constrained identically.
+        ora_best_arr = masked_oracle_best(ora_ev_matrix, shifted_safe_actions)
 
         regret_arr = ora_best_arr - ora_ml_arr
 
         shifts_results[shift_name] = {
             "parameters": shift_params,
             "ground_truth_recomputed_on_shifted_context": True,
+            "safety_gate_recomputed_on_shifted_context": True,
             "events_evaluated": int(N),
             "ml_policy_ev_ci": compute_bootstrap_ci(ora_ml_arr),
             "baseline_policy_ev_ci": compute_bootstrap_ci(ora_b_arr),
@@ -508,7 +549,7 @@ def run_ground_truth_robustness(
     amounts = df_test_obs["amount"].values
     retry_counts = df_test_obs["retry_count_before_event"].values
     fail_cats = df_test_obs["failure_category"].values
-    safe_actions_list, baseline_actions = get_precomputed_safety_and_baseline(df_test_obs)
+    safe_actions_list, baseline_actions = compute_safety_and_baseline(df_test_obs)
 
     # The policy's own decisions do not depend on the simulator, so they are fixed
     # across all scenarios. Only the ground truth used to score them changes.
@@ -596,7 +637,7 @@ def run_stress_testing(
             
         ev_matrix[:, a_idx] = (p_vec * amounts) - c_val - d_vec - f_val
         
-    safe_actions_list, baseline_actions = get_precomputed_safety_and_baseline(df_test_obs)
+    safe_actions_list, baseline_actions = compute_safety_and_baseline(df_test_obs)
     ml_actions = []
     ml_evs = []
     
