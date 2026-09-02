@@ -27,7 +27,7 @@
 
 > **Razorpay Buildathon 2026 — Track 03: AI Revenue Recovery**  
 > **Project**: O1 — Payment Failure Economic Recovery Advisor  
-> **Repository**: `C:\Users\admin\Documents\Razorpay`  
+> **Repository**: `Razorpay`
 > **Starting Git Checkpoint**: `f9c5f0b` (`docs: finalize buildathon submission package`)  
 > **Audit Branch**: `audit/task16-reproduction`  
 

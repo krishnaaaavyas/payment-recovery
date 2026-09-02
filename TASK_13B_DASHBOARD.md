@@ -101,13 +101,14 @@ frontend/
 
 ### Step 1: Start Backend Service
 ```bash
-# From workspace root: C:\Users\admin\Documents\Razorpay
+# Run from the repository root
 uvicorn src.api.app:app --reload --port 8000
 ```
 
-### Step 2: Start Frontend Application
+### Terminal 2: Start React Frontend Operations Console
 ```bash
-# From frontend directory: C:\Users\admin\Documents\Razorpay\frontend
+# From the frontend directory
+cd frontend
 npm run dev
 ```
 Open browser at `http://localhost:5173`.

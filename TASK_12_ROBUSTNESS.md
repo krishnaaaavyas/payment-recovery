@@ -192,5 +192,5 @@ python -m unittest tests/test_task12_robustness.py
 ```
 
 Generated outputs:
-- Results JSON: [`reports/task12_robustness.json`](file:///c:/Users/admin/Documents/Razorpay/reports/task12_robustness.json)
-- Figures: [`reports/figures/task12/`](file:///c:/Users/admin/Documents/Razorpay/reports/figures/task12/)
+- Results JSON: [`reports/task12_robustness.json`](reports/task12_robustness.json)
+- Figures: [`reports/figures/task12/`](reports/figures/task12/)

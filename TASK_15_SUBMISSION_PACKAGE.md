@@ -2,7 +2,7 @@
 
 > **Razorpay Buildathon 2026 — Track 03: AI Revenue Recovery**  
 > **Project**: O1 — Payment Failure Economic Recovery Advisor  
-> **Repository**: `C:\Users\admin\Documents\Razorpay`  
+> **Repository**: `Razorpay`
 
 ---
 

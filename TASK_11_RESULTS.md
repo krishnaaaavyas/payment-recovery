@@ -34,7 +34,7 @@ The core estimator models $P(\text{recovery} = 1 | X, \text{action})$ using 24 d
 
 ## 4. Economic Policy Advisor Formulation
 For any failure context $X$:
-1. **Safety Gate Filtering**: Computes allowable safe actions $A_{\text{safe}}(X)$ via deterministic safety rules in [`src/data/safety.py`](file:///c:/Users/admin/Documents/Razorpay/src/data/safety.py).
+1. **Safety Gate Filtering**: Computes allowable safe actions $A_{\text{safe}}(X)$ via deterministic safety rules in [`src/data/safety.py`](src/data/safety.py).
 2. **Probability Estimation**: Obtains $\hat{P}(\text{recovery} | X, a)$ for candidate actions $a \in A_{\text{safe}}(X)$.
 3. **Economic Valuation**: Computes expected economic value for each safe candidate action:
    $$EV(a | X) = \hat{P}(\text{recovery} | X, a) \cdot V - C(a) - D(a) - F(a)$$
@@ -113,13 +113,13 @@ which reads only the decline code, cannot see any of that.
 
 ---
 
-## 7. Visualizations
+## 7. Visual Figure Outputs
 
-Generated plots are saved under [`reports/figures/`](file:///c:/Users/admin/Documents/Razorpay/reports/figures/):
-1. **Calibration Curve**: [`reports/figures/calibration_curve.png`](file:///c:/Users/admin/Documents/Razorpay/reports/figures/calibration_curve.png)
-2. **Probability Distribution**: [`reports/figures/prob_distribution.png`](file:///c:/Users/admin/Documents/Razorpay/reports/figures/prob_distribution.png)
-3. **Action Selection Share**: [`reports/figures/action_distribution.png`](file:///c:/Users/admin/Documents/Razorpay/reports/figures/action_distribution.png)
-4. **Economic Performance Comparison**: [`reports/figures/ev_comparison.png`](file:///c:/Users/admin/Documents/Razorpay/reports/figures/ev_comparison.png)
+Generated plots are saved under [`reports/figures/`](reports/figures/):
+1. **Calibration Curve**: [`reports/figures/calibration_curve.png`](reports/figures/calibration_curve.png)
+2. **Probability Distribution**: [`reports/figures/prob_distribution.png`](reports/figures/prob_distribution.png)
+3. **Action Selection Share**: [`reports/figures/action_distribution.png`](reports/figures/action_distribution.png)
+4. **Economic Performance Comparison**: [`reports/figures/ev_comparison.png`](reports/figures/ev_comparison.png)
 
 ---
 
