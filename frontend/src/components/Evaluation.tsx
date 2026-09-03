@@ -62,19 +62,18 @@ export const Evaluation: React.FC = () => {
   return (
     <div className="space-y-6">
 
-      <div className="bg-slate-900/60 border border-slate-800 rounded-xl p-5 flex flex-wrap items-center justify-between gap-4">
+      <div className="bg-slate-900 border border-slate-800 rounded-lg p-5 flex flex-wrap items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2">
             <BarChart3 className="h-5 w-5 text-indigo-400" />
-            <h2 className="text-lg font-bold text-slate-100">Task 11 &amp; 12 Evaluation</h2>
+            <h2 className="text-lg font-bold text-slate-100">O1 Evaluation &amp; Benchmarks</h2>
           </div>
           <p className="text-xs text-slate-400 mt-0.5">
-            Live from <span className="font-mono">GET /reports/summary</span> — direct ground-truth simulator benchmark,
-            SNIPS off-policy estimator, robustness and ablation
+            Direct ground-truth simulator benchmark, off-policy SNIPS estimation, safety gate ablations, and sensitivity robustness matrix
           </p>
         </div>
-        <div className="px-3 py-1 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20 text-xs font-semibold">
-          Synthetic Evaluation Environment
+        <div className="px-3 py-1 rounded bg-slate-800 text-slate-300 border border-slate-700 text-xs font-semibold">
+          Synthetic Evaluation Data
         </div>
       </div>
 

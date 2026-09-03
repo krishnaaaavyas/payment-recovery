@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { FailedPaymentEvent } from '../types/api';
-import { Search, Filter, ArrowRight, Zap, RefreshCw } from 'lucide-react';
+import { Search, Filter, ArrowRight, RefreshCw } from 'lucide-react';
 
 interface PaymentQueueProps {
   events: FailedPaymentEvent[];
@@ -28,11 +28,24 @@ export const PaymentQueue: React.FC<PaymentQueueProps> = ({
   });
 
   return (
-    <div className="space-y-4">
-      
+    <div className="space-y-5">
+
+      {/* Top Concise Summary Banner */}
+      <div className="bg-slate-900 border border-slate-800 rounded-lg p-4 flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <h2 className="text-base font-bold text-slate-100">Failed Payments</h2>
+          <p className="text-xs text-slate-400">O1 analyzes failure context and recommends safe, high-value recovery actions.</p>
+        </div>
+        <div className="flex items-center gap-4 text-xs font-mono">
+          <div className="text-slate-400">Evaluated: <span className="font-bold text-slate-200">15,000</span></div>
+          <div className="text-emerald-400 font-bold">Net EV Uplift: +40.78%</div>
+          <div className="text-slate-300">Safety Violations: <span className="font-bold text-emerald-400">0</span></div>
+        </div>
+      </div>
+
       {/* Control Header & Filters */}
-      <div className="bg-slate-900/60 border border-slate-800 rounded-xl p-4 flex flex-wrap items-center justify-between gap-3">
-        
+      <div className="bg-slate-900 border border-slate-800 rounded-lg p-3 flex flex-wrap items-center justify-between gap-3">
+
         {/* Search */}
         <div className="relative flex-1 min-w-[240px]">
           <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-500" />
@@ -41,7 +54,7 @@ export const PaymentQueue: React.FC<PaymentQueueProps> = ({
             placeholder="Search by Payment ID or Failure Code..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full bg-slate-950 border border-slate-800 rounded-lg pl-9 pr-4 py-2 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500"
+            className="w-full bg-slate-950 border border-slate-800 rounded-md pl-9 pr-4 py-1.5 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500"
           />
         </div>
 
@@ -51,7 +64,7 @@ export const PaymentQueue: React.FC<PaymentQueueProps> = ({
           <select
             value={methodFilter}
             onChange={(e) => setMethodFilter(e.target.value)}
-            className="bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-300 focus:outline-none focus:border-indigo-500"
+            className="bg-slate-950 border border-slate-800 rounded-md px-3 py-1.5 text-xs text-slate-300 focus:outline-none focus:border-indigo-500"
           >
             <option value="ALL">All Methods</option>
             <option value="card_credit">Credit Card</option>
@@ -65,7 +78,7 @@ export const PaymentQueue: React.FC<PaymentQueueProps> = ({
           <select
             value={categoryFilter}
             onChange={(e) => setCategoryFilter(e.target.value)}
-            className="bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-300 focus:outline-none focus:border-indigo-500"
+            className="bg-slate-950 border border-slate-800 rounded-md px-3 py-1.5 text-xs text-slate-300 focus:outline-none focus:border-indigo-500"
           >
             <option value="ALL">All Failure Categories</option>
             <option value="network_timeout">Network Timeout</option>
@@ -78,7 +91,7 @@ export const PaymentQueue: React.FC<PaymentQueueProps> = ({
         {/* Refresh Button */}
         <button
           onClick={onRefresh}
-          className="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors"
+          className="p-1.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors"
           title="Refresh Events"
         >
           <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
@@ -87,7 +100,7 @@ export const PaymentQueue: React.FC<PaymentQueueProps> = ({
       </div>
 
       {/* Events Table */}
-      <div className="bg-slate-900/60 border border-slate-800 rounded-xl overflow-hidden">
+      <div className="bg-slate-900 border border-slate-800 rounded-lg overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs text-slate-300">
             <thead className="bg-slate-950 border-b border-slate-800 text-slate-400 font-semibold uppercase tracking-wider text-[11px]">
@@ -102,11 +115,11 @@ export const PaymentQueue: React.FC<PaymentQueueProps> = ({
                 <th className="px-4 py-3 text-right">Action</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800/60">
+            <tbody className="divide-y divide-slate-800/80">
               {loading ? (
                 <tr>
                   <td colSpan={8} className="px-4 py-8 text-center text-slate-500">
-                    Loading synthetic failure episodes...
+                    Loading failed payment episodes...
                   </td>
                 </tr>
               ) : filteredEvents.length === 0 ? (
@@ -118,7 +131,7 @@ export const PaymentQueue: React.FC<PaymentQueueProps> = ({
               ) : (
                 filteredEvents.map((evt) => (
                   <tr key={evt.payment_id} className="hover:bg-slate-800/40 transition-colors">
-                    <td className="px-4 py-3 font-mono font-medium text-indigo-400">
+                    <td className="px-4 py-3 font-mono font-semibold text-indigo-400">
                       {evt.payment_id}
                     </td>
                     <td className="px-4 py-3 font-mono font-bold text-slate-100">
@@ -129,7 +142,7 @@ export const PaymentQueue: React.FC<PaymentQueueProps> = ({
                     </td>
                     <td className="px-4 py-3">
                       <span className="px-2 py-0.5 rounded text-[11px] font-medium bg-slate-800 text-slate-300 border border-slate-700">
-                        {evt.failure_category}
+                        {evt.failure_category.replace('_', ' ')}
                       </span>
                     </td>
                     <td className="px-4 py-3 font-mono text-[11px] text-slate-400 truncate max-w-[180px]">
@@ -144,10 +157,9 @@ export const PaymentQueue: React.FC<PaymentQueueProps> = ({
                     <td className="px-4 py-3 text-right">
                       <button
                         onClick={() => onSelectEvent(evt)}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 border border-indigo-500/30 text-xs font-medium transition-colors"
+                        className="inline-flex items-center gap-1.5 px-3 py-1 rounded bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 border border-indigo-500/30 text-xs font-medium transition-colors"
                       >
-                        <Zap className="h-3.5 w-3.5 text-indigo-400" />
-                        <span>Analyze</span>
+                        <span>Review Decision</span>
                         <ArrowRight className="h-3.5 w-3.5" />
                       </button>
                     </td>

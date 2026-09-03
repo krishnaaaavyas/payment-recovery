@@ -1,5 +1,5 @@
 import React from 'react';
-import { LayoutDashboard, ListFilter, Crosshair, FileCheck, BarChart3 } from 'lucide-react';
+import { LayoutDashboard, ListFilter, Zap, FileCheck, BarChart3 } from 'lucide-react';
 
 export type TabType = 'overview' | 'queue' | 'inspector' | 'audit' | 'evaluation';
 
@@ -17,19 +17,19 @@ export const Navigation: React.FC<NavigationProps> = ({
   activeDecisionId
 }) => {
   const tabs = [
+    { id: 'queue', label: 'Payments', icon: ListFilter },
+    {
+      id: 'inspector',
+      label: selectedPaymentId ? `Decision (${selectedPaymentId.slice(-8)})` : 'Decision',
+      icon: Zap
+    },
+    {
+      id: 'audit',
+      label: activeDecisionId ? `Audit (${activeDecisionId.slice(-8)})` : 'Audit',
+      icon: FileCheck
+    },
+    { id: 'evaluation', label: 'Evaluation', icon: BarChart3 },
     { id: 'overview', label: 'Overview', icon: LayoutDashboard },
-    { id: 'queue', label: 'Payment Queue', icon: ListFilter },
-    { 
-      id: 'inspector', 
-      label: selectedPaymentId ? `Inspector (${selectedPaymentId.slice(-8)})` : 'Decision Inspector', 
-      icon: Crosshair 
-    },
-    { 
-      id: 'audit', 
-      label: activeDecisionId ? `Audit Trail (${activeDecisionId.slice(-8)})` : 'Audit Trail', 
-      icon: FileCheck 
-    },
-    { id: 'evaluation', label: 'Evaluation Metrics', icon: BarChart3 },
   ];
 
   return (

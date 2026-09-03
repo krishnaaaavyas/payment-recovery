@@ -38,12 +38,12 @@ export const AuditTrail: React.FC<AuditTrailProps> = ({ decisionId }) => {
 
   return (
     <div className="space-y-6">
-      
+
       {/* Search Bar Header */}
-      <div className="bg-slate-900/60 border border-slate-800 rounded-xl p-4 flex flex-wrap items-center justify-between gap-3">
+      <div className="bg-slate-900 border border-slate-800 rounded-lg p-4 flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2 text-xs font-semibold text-slate-300">
           <FileCheck className="h-4 w-4 text-indigo-400" />
-          <span>Decision Audit Trail Search</span>
+          <span>Decision Audit Search</span>
         </div>
 
         <div className="flex items-center gap-2 flex-1 max-w-md">
@@ -55,15 +55,15 @@ export const AuditTrail: React.FC<AuditTrailProps> = ({ decisionId }) => {
               value={searchId}
               onChange={(e) => setSearchId(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && loadAudit(searchId)}
-              className="w-full bg-slate-950 border border-slate-800 rounded-lg pl-9 pr-4 py-2 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500"
+              className="w-full bg-slate-950 border border-slate-800 rounded-md pl-9 pr-4 py-1.5 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500"
             />
           </div>
           <button
             onClick={() => loadAudit(searchId)}
             disabled={loading}
-            className="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold transition-colors disabled:opacity-50"
+            className="px-4 py-1.5 rounded bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold transition-colors disabled:opacity-50"
           >
-            Lookup Audit
+            Lookup
           </button>
         </div>
       </div>
@@ -86,7 +86,7 @@ export const AuditTrail: React.FC<AuditTrailProps> = ({ decisionId }) => {
 
       {record && (
         <div className="bg-slate-900/60 border border-slate-800 rounded-xl p-6 space-y-6">
-          
+
           {/* Header Summary Row */}
           <div className="flex flex-wrap items-center justify-between border-b border-slate-800 pb-4 gap-3">
             <div>
@@ -119,7 +119,7 @@ export const AuditTrail: React.FC<AuditTrailProps> = ({ decisionId }) => {
             </pre>
           ) : (
             <div className="space-y-6">
-              
+
               {/* Evaluated Action Probability & EV Matrix */}
               <div className="space-y-3">
                 <h4 className="text-xs font-bold text-slate-300 uppercase tracking-wider">Candidate Action Evaluation Matrix</h4>
