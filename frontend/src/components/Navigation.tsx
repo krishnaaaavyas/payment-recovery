@@ -1,5 +1,5 @@
 import React from 'react';
-import { LayoutDashboard, ListFilter, Zap, FileCheck, BarChart3 } from 'lucide-react';
+import { ListFilter, Zap, FileCheck, BarChart3, LayoutDashboard } from 'lucide-react';
 
 export type TabType = 'overview' | 'queue' | 'inspector' | 'audit' | 'evaluation';
 
@@ -33,8 +33,8 @@ export const Navigation: React.FC<NavigationProps> = ({
   ];
 
   return (
-    <nav className="border-b border-slate-800 bg-slate-900/50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex overflow-x-auto space-x-1 py-2">
+    <nav className="border-b border-slate-800 bg-slate-900">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex overflow-x-auto space-x-1 pt-1">
         {tabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
@@ -42,13 +42,13 @@ export const Navigation: React.FC<NavigationProps> = ({
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id as TabType)}
-              className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-medium transition-colors whitespace-nowrap ${
+              className={`flex items-center gap-2 px-4 py-2.5 text-xs font-semibold border-b-2 transition-colors whitespace-nowrap ${
                 isActive
-                  ? 'bg-indigo-600/20 text-indigo-300 border border-indigo-500/30'
-                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
+                  ? 'border-indigo-500 text-indigo-300 bg-slate-800/60'
+                  : 'border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-800/30'
               }`}
             >
-              <Icon className={`h-4 w-4 ${isActive ? 'text-indigo-400' : 'text-slate-500'}`} />
+              <Icon className={`h-3.5 w-3.5 ${isActive ? 'text-indigo-400' : 'text-slate-500'}`} />
               <span>{tab.label}</span>
             </button>
           );
