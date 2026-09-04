@@ -1,7 +1,7 @@
-# DATASET CARD: O1 Payment Failure Recovery Synthetic Dataset
+# DATASET CARD: Payment Recovery Synthetic Dataset
 
 ## Dataset Purpose
-This synthetic dataset provides a reproducible, non-circular experimental environment for training, validating, and evaluating the **O1 — Payment Failure Economic Recovery Advisor** (Razorpay Track 03 — AI Revenue Recovery).
+This synthetic dataset provides a reproducible, non-circular experimental environment for training, validating, and evaluating **Payment Recovery** (Built for Razorpay AI Buildathon 2026 — Track 03: AI Revenue Recovery).
 
 It enables:
 1. Deterministic decline-code baseline evaluation.

@@ -1,4 +1,4 @@
-# O1 — Payment Failure Economic Recovery Advisor
+# Payment Recovery
 #
 # Lower bounds are the supported floor; the exact versions this project was built,
 # trained and verified against are pinned in requirements-lock.txt.

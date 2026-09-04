@@ -1,29 +1,29 @@
-# O1 — Payment Failure Economic Recovery Advisor
+# Payment Recovery
 
-**Track 03 — AI Revenue Recovery**  
-**Razorpay Buildathon 2026 Submission Package**  
+**Track 03 — AI Revenue Recovery**
+**Razorpay Buildathon 2026 Submission Package**
 **Public Repository:** [https://github.com/krishnaaaavyas/razorpay-payment-recovery-advisor](https://github.com/krishnaaaavyas/razorpay-payment-recovery-advisor)
 
 ---
 
 ## 1. PROJECT TITLE
 
-**O1 — Payment Failure Economic Recovery Advisor**  
-*Razorpay Buildathon 2026 — Track 03: AI Revenue Recovery*
+**Payment Recovery**
+*Built for Razorpay AI Buildathon 2026 — Track 03: AI Revenue Recovery*
 
 ---
 
 ## 2. ONE-LINE PITCH
 
-O1 evaluates failed payment episodes, predicts action-conditional recovery probabilities, calculates Net Expected Economic Value, and enforces hard deterministic domain safety rules to recommend optimal recovery interventions.
+Payment Recovery evaluates failed payment episodes, predicts action-conditional recovery probabilities, calculates Net Expected Economic Value, and enforces hard deterministic domain safety rules to recommend optimal recovery interventions.
 
 ---
 
 ## 3. THE PROBLEM
 
-Transaction failures in digital payments create significant, recoverable revenue loss for merchants and payment platforms. Traditional payment recovery relies primarily on static, blanket retry schedules or basic heuristic rules. These unconstrained approaches fail to consider payment context—such as failure origin, issuer category, transaction amount, customer payment tenure, or active bank outages. 
+Transaction failures in digital payments create significant, recoverable revenue loss for merchants and payment platforms. Traditional payment recovery relies primarily on static, blanket retry schedules or basic heuristic rules. These unconstrained approaches fail to consider payment context—such as failure origin, issuer category, transaction amount, customer payment tenure, or active bank outages.
 
-Consequently, naive retries generate excessive gateway fee overhead, exacerbate customer friction, and risk violating bank or regulatory policy limits (for instance, repeatedly attempting auto-retries during an active bank outage or retrying authentication failures without credential updates). 
+Consequently, naive retries generate excessive gateway fee overhead, exacerbate customer friction, and risk violating bank or regulatory policy limits (for instance, repeatedly attempting auto-retries during an active bank outage or retrying authentication failures without credential updates).
 
 Effective payment recovery cannot simply be treated as a brute-force retry problem; it must be framed as a **constrained economic decision-making problem** where every intervention balances recovery revenue against operational cost, customer friction, and strict safety constraints.
 
@@ -31,7 +31,7 @@ Effective payment recovery cannot simply be treated as a brute-force retry probl
 
 ## 4. OUR SOLUTION
 
-O1 implements a closed-loop, 7-stage decision architecture:
+Payment Recovery implements a closed-loop, 7-stage decision architecture:
 
 $$\text{DETECT} \longrightarrow \text{PREDICT} \longrightarrow \text{VALUE} \longrightarrow \text{CONSTRAIN} \longrightarrow \text{DECIDE} \longrightarrow \text{EXECUTE} \longrightarrow \text{AUDIT}$$
 
@@ -253,47 +253,47 @@ LLMs or natural language interfaces can be used for summary explanations, but co
 
 ## 16. LIKELY JUDGE QUESTIONS & VERBAL ANSWERS
 
-**Q1. Why is O1 better than a simple retry rule?**  
+**Q1. Why is O1 better than a simple retry rule?**
 *Answer:* Simple retry rules ignore context, costs, and friction. O1 predicts recovery probability based on 24 contextual features, calculates net economic value after costs, and enforces safety bounds to avoid useless or dangerous retries.
 
-**Q2. Why use ML here?**  
+**Q2. Why use ML here?**
 *Answer:* Issuer behaviors, failure categories, and customer tenure interact non-linearly. ML predicts action-conditional recovery probability $P(\text{recovery} \mid X, a)$ far more accurately than static lookup tables.
 
-**Q3. Why not use an LLM for decisions?**  
+**Q3. Why not use an LLM for decisions?**
 *Answer:* Payment recovery requires low latency, mathematical optimization, and guaranteed safety compliance. O1 uses ML for probabilities and code for safety/EV, ensuring 100% deterministic safety bounds.
 
-**Q4. How do you prevent unsafe recovery actions?**  
+**Q4. How do you prevent unsafe recovery actions?**
 *Answer:* The Safety Gate pre-filters candidate actions before economic selection. Unsafe actions are stripped upfront, resulting in 0.00% safety violations across 15,000 test episodes.
 
-**Q5. What happens during a bank outage?**  
+**Q5. What happens during a bank outage?**
 *Answer:* The Safety Gate applies `EXCLUDE_RETRY_ON_OUTAGE`, blocking immediate retries and selecting either delayed retry or operator escalation.
 
-**Q6. How do you measure economic improvement?**  
+**Q6. How do you measure economic improvement?**
 *Answer:* We compute Net Expected Economic Value ($\text{EV} = P \cdot V - \text{Cost} - \text{Friction}$) and compare O1 against a standard baseline retry policy. O1 achieves a +40.78% net EV uplift.
 
-**Q7. How do you know the ML model is calibrated?**  
+**Q7. How do you know the ML model is calibrated?**
 *Answer:* We evaluate probability calibration using Brier score (0.1485) and ROC AUC (0.8600) on test evaluation data.
 
-**Q8. What does 99.87% efficiency mean?**  
+**Q8. What does 99.87% efficiency mean?**
 *Answer:* It means O1 achieves 99.87% of the maximum theoretical economic recovery value attainable by an all-knowing Oracle policy.
 
-**Q9. Why is the data synthetic?**  
+**Q9. Why is the data synthetic?**
 *Answer:* Public payment failure datasets with ground-truth counterfactuals do not exist due to commercial privacy. Synthetic data allows full population benchmarking, safety ablations, and reproducible research.
 
-**Q10. What would you do with real Razorpay data?**  
+**Q10. What would you do with real Razorpay data?**
 *Answer:* We would train the classifier on historical Razorpay transaction logs, connect live bank outage feeds, configure merchant-specific friction parameters, and run A/B testing.
 
-**Q11. Is execution real?**  
+**Q11. Is execution real?**
 *Answer:* Execution is simulated via API endpoints to demonstrate end-to-end operational dispatch without live money movement.
 
-**Q12. How would this scale in production?**  
+**Q12. How would this scale in production?**
 *Answer:* The architecture is lightweight (FastAPI + Scikit-Learn inference <10ms per event), allowing sub-second decision making at scale.
 
 ---
 
 ## 17. 30-SECOND SPOKEN PITCH
 
-> "Transaction failures cost merchants millions in lost revenue, but naive retries waste money on gateway fees and frustrate customers. O1 is an AI Revenue Recovery Advisor built for Razorpay Track 03. It predicts recovery probability using a calibrated ML model, calculates Net Expected Economic Value after costs, and enforces hard Safety Gates to block unsafe retries. On 15,000 test episodes in a synthetic evaluation environment, O1 delivered a +40.78% net EV uplift with zero safety violations, achieving 99.87% of Oracle efficiency."
+> "Transaction failures cost merchants millions in lost revenue, but naive retries waste money on gateway fees and frustrate customers. Payment Recovery is built for Razorpay Track 03. It predicts recovery probability using a calibrated ML model, calculates Net Expected Economic Value after costs, and enforces hard Safety Gates to block unsafe retries. On 15,000 test episodes in a synthetic evaluation environment, Payment Recovery delivered a +40.78% net EV uplift with zero safety violations, achieving 99.87% of Oracle efficiency."
 
 ---
 
@@ -301,15 +301,15 @@ LLMs or natural language interfaces can be used for summary explanations, but co
 
 > "Payment failures are a major leak in digital commerce. Today, most gateways rely on static retry schedules. But retrying a payment without context is inefficient: retrying during a bank outage wastes fees, and retrying authentication errors without new credentials annoys customers.
 >
-> O1 transforms payment recovery into a constrained economic decision problem. When a failure occurs, O1 ingests 24 contextual features—including failure codes, issuer bank tier, and customer tenure. 
+> Payment Recovery transforms payment recovery into a constrained economic decision problem. When a failure occurs, the system ingests 24 contextual features—including failure codes, issuer bank tier, and customer tenure.
 >
-> First, our Safety Gate evaluates hard policy rules, stripping out illegal or unsafe actions before any optimization happens. 
+> First, our Safety Gate evaluates hard policy rules, stripping out illegal or unsafe actions before any optimization happens.
 >
-> Next, a calibrated Gradient Boosting ML model predicts the recovery probability for each safe action. 
+> Next, a calibrated Gradient Boosting ML model predicts the recovery probability for each safe action.
 >
 > Then, our economic engine calculates Net Expected Economic Value—factoring in transaction amount, gateway fees, and customer friction penalties—and selects the action that maximizes net return.
 >
-> In our synthetic benchmark of 15,000 episodes, O1 achieved a +40.78% net EV uplift over standard retries with 0.00% safety violations, capturing 99.87% of theoretical Oracle value. O1 proves that smart, safe economic decisions recover more revenue at lower cost."
+> In our synthetic benchmark of 15,000 episodes, Payment Recovery achieved a +40.78% net EV uplift over standard retries with 0.00% safety violations, capturing 99.87% of theoretical Oracle value. Payment Recovery proves that smart, safe economic decisions recover more revenue at lower cost."
 
 ---
 
@@ -317,20 +317,20 @@ LLMs or natural language interfaces can be used for summary explanations, but co
 
 | Time | Screen / Action | Spoken Words | Objective |
 |---|---|---|---|
-| **00:00–00:30** | Open **Payments Queue** (`/queue`) | *"Welcome to O1. Here in the Payments Queue, payment operations teams can view failed transactions in real time. Notice transaction `pay_evt_00004778` for ₹555.14, which failed due to authentication failure."* | Establish context & operational view. |
-| **00:30–01:15** | Click **Review Decision** | *"When we select this payment, O1 evaluates available recovery interventions. Instead of blindly retrying, O1 analyzes failure context and computes net economic value."* | Introduce contextual decision making. |
-| **01:15–02:00** | View **Decision Inspector** (`/inspector`) | *"O1 recommends 'SWITCH PAYMENT METHOD' with an Expected Economic Value of ₹259.46 and a 49.44% recovery probability. Notice the plain-language rationale explaining why this action maximizes net return."* | Show ML prediction & EV calculation. |
-| **02:00–02:30** | Point out **Safety Checks** | *"Crucially, before economic ranking, O1's Safety Gate checked domain policy rules. Immediate retry was ruled out due to technical failure constraints, guaranteeing zero safety violations."* | Highlight Safety Gate pre-filtering. |
-| **02:30–03:00** | Click **Execute Recommended Action** | *"We execute the recommendation. O1 dispatches a simulated method switch prompt to the customer session and confirms status: SCHEDULED."* | Demonstrate execution dispatch. |
+| **00:00–00:30** | Open **Payments Queue** (`/queue`) | *"Welcome to Payment Recovery. Here in the Payments Queue, payment operations teams can view failed transactions in real time. Notice transaction `pay_evt_00004778` for ₹555.14, which failed due to authentication failure."* | Establish context & operational view. |
+| **00:30–01:15** | Click **Review Decision** | *"When we select this payment, the system evaluates available recovery interventions. Instead of blindly retrying, Payment Recovery analyzes failure context and computes net economic value."* | Introduce contextual decision making. |
+| **01:15–02:00** | View **Decision Inspector** (`/inspector`) | *"The system recommends 'SWITCH PAYMENT METHOD' with an Expected Economic Value of ₹259.46 and a 49.44% recovery probability. Notice the plain-language rationale explaining why this action maximizes net return."* | Show ML prediction & EV calculation. |
+| **02:00–02:30** | Point out **Safety Checks** | *"Crucially, before economic ranking, the Safety Gate checked domain policy rules. Immediate retry was ruled out due to technical failure constraints, guaranteeing zero safety violations."* | Highlight Safety Gate pre-filtering. |
+| **02:30–03:00** | Click **Execute Recommended Action** | *"We execute the recommendation. The system dispatches a simulated method switch prompt to the customer session and confirms status: SCHEDULED."* | Demonstrate execution dispatch. |
 | **03:00–03:45** | Click **View Audit Record** (`/audit`) | *"Every decision produces an immutable audit record (`dec_bbea3051`), showing the candidate evaluation matrix, safety clearance, and execution log for compliance."* | Demonstrate auditability & compliance. |
-| **03:45–04:30** | Navigate to **Evaluation** (`/evaluation`) | *"On our evaluation benchmark of 15,000 episodes, O1 delivers a +40.78% net EV uplift over standard retries with 0.00% safety violations, achieving 99.87% of Oracle efficiency."* | Present headline scientific evidence. |
+| **03:45–04:30** | Navigate to **Evaluation** (`/evaluation`) | *"On our evaluation benchmark of 15,000 episodes, Payment Recovery delivers a +40.78% net EV uplift over standard retries with 0.00% safety violations, achieving 99.87% of Oracle efficiency."* | Present headline scientific evidence. |
 | **04:30–05:00** | Point to **Tier C Disclosure** | *"All metrics reflect a controlled Tier C synthetic evaluation environment, proving the architecture and economic methodology. Thank you!"* | Disclose synthetic environment & wrap up. |
 
 ---
 
 ## 20. FINAL CLOSING STATEMENT
 
-O1 demonstrates that payment failure recovery should not be approached through unconstrained retries or opaque language generation. By framing recovery as constrained economic decision-making—combining calibrated machine learning, mathematical economic valuation, and hard deterministic safety bounds—O1 provides a transparent, safe, and highly effective model for digital revenue recovery.
+Payment Recovery demonstrates that payment failure recovery should not be approached through unconstrained retries or opaque language generation. By framing recovery as constrained economic decision-making—combining calibrated machine learning, mathematical economic valuation, and hard deterministic safety bounds—Payment Recovery provides a transparent, safe, and highly effective model for digital revenue recovery.
 
 ---
 

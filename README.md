@@ -1,4 +1,8 @@
-# O1 — Payment Failure Economic Recovery Advisor
+# Payment Recovery
+
+### Recover failed payments with safer, smarter decisions.
+
+**Built for Razorpay AI Buildathon 2026 — Track 03: AI Revenue Recovery**
 
 > **Post-payment-failure economic decision service selecting safety-constrained interventions to maximize net expected economic value.**
 
@@ -15,13 +19,13 @@ Payment failures do not all deserve the same recovery action. A naive retry may 
 
 > **The correct question is NOT simply "Can we recover this payment?" but "Which recovery intervention maximizes expected economic value while remaining safe and bounded?"**
 
-O1 treats revenue recovery as an **economic optimization problem under hard domain safety constraints**.
+Payment Recovery treats revenue recovery as an **economic optimization problem under hard domain safety constraints**.
 
 ---
 
 ## What We Built
 
-O1 is a **post-payment-failure economic decision agent**. It does NOT perform real-time routing, fraud detection, or autonomous money movement. Instead, given a failed payment episode context $X$, O1 evaluates 5 bounded actions:
+Payment Recovery is a **post-payment-failure economic decision agent**. It does NOT perform real-time routing, fraud detection, or autonomous money movement. Instead, given a failed payment episode context $X$, the system evaluates 5 bounded actions:
 
 1. `retry_now` — Immediate dispatch for transient network glitches
 2. `retry_later` — Scheduled retry during optimal issuer availability window
@@ -31,9 +35,9 @@ O1 is a **post-payment-failure economic decision agent**. It does NOT perform re
 
 ---
 
-## How O1 Works
+## How Payment Recovery Works
 
-O1 runs a 5-step decision loop:
+The system runs a 5-step decision loop:
 
 ```text
 Payment Failure Event
@@ -125,7 +129,7 @@ With the Safety Gate active, safety violations are **0.00%** across the 15,000-e
 Evaluated on the 15,000-episode held-out synthetic test split. Two evaluations are reported and they answer different questions - the distinction matters:
 
 - **Direct ground-truth simulator (authoritative).** Scores the policy against the hidden simulator on *every* episode. No matched subset, no importance weights, no estimator variance. This is the headline benchmark.
-- **SNIPS off-policy estimator (deployment analogue).** Estimates policy value only from logged episodes where O1 happens to agree with the historical policy, reweighted by `1/e(a|X)`. It is what a real deployment would have to rely on before running an experiment, so we report it - but it uses a fraction of the data and carries wide uncertainty.
+- **SNIPS off-policy estimator (deployment analogue).** Estimates policy value only from logged episodes where the policy happens to agree with the historical policy, reweighted by `1/e(a|X)`. It is what a real deployment would have to rely on before running an experiment, so we report it - but it uses a fraction of the data and carries wide uncertainty.
 
 ### Model quality
 
@@ -144,11 +148,11 @@ Selected model: sigmoid-calibrated `HistGradientBoostingClassifier`, chosen on v
 | :--- | :---: | :--- |
 | Episodes scored | `15,000 / 15,000` | None dropped |
 | Deterministic baseline EV | `₹1,671.74` | Decline-code rules |
-| **O1 economic policy EV** | **`₹2,353.54`** | Safety-constrained EV maximization |
+| **Payment Recovery policy EV** | **`₹2,353.54`** | Safety-constrained EV maximization |
 | Oracle best achievable EV | `₹2,356.66` | `max` over the safe set with true probabilities |
 | **Net uplift over baseline** | **`+₹681.80 / event` (+40.78%)** | Full population |
 | **Regret vs oracle** | **`₹3.12 / event`** | 99.87% of the oracle ceiling |
-| Per-event dominance violations | `0` | `EV_true(O1) <= EV_true(oracle)` holds on every episode |
+| Per-event dominance violations | `0` | `EV_true(Policy) <= EV_true(oracle)` holds on every episode |
 | Action matches oracle-best | `96.85%` | |
 | Safety violation rate | **`0.00%`** | Full architecture |
 | Without Safety Gate (A3) | `83.23%` | Ablation - see above |
@@ -159,7 +163,7 @@ Selected model: sigmoid-calibrated `HistGradientBoostingClassifier`, chosen on v
 | :--- | :---: | :--- |
 | Logged epsilon-greedy policy realized EV | `₹1,596.19` | epsilon = 0.30 |
 | Baseline SNIPS EV | `₹1,676.60` | 95% CI `₹1,567.68 - ₹1,785.87`, coverage 72.71% |
-| O1 SNIPS EV | `₹2,415.74` | 95% CI `₹2,088.89 - ₹2,861.67`, coverage 37.80% |
+| Payment Recovery SNIPS EV | `₹2,415.74` | 95% CI `₹2,088.89 - ₹2,861.67`, coverage 37.80% |
 | Effective sample size | `1,724.6` | 11.5% of N - the reason the interval is wide |
 | Min logging propensity / max weight | `0.075` / `13.33` | Overlap holds; no clipping needed or applied |
 | SNIPS minus direct true EV | `+₹62.20` | **Estimator variance, not additional recovered value** |
@@ -177,7 +181,7 @@ The SNIPS point estimate sits above the direct value by well under one standard 
 
 Task 12 re-scores the **frozen** policy across 6 economic perturbations, 3 ground-truth interaction scalings and 4 distribution shifts. In every scenario the ground truth is recomputed for the perturbed world, so the policy is never scored against the truth of a different environment. Values below are read from [`reports/task12_robustness.json`](reports/task12_robustness.json).
 
-| Scenario | Baseline EV | O1 Policy EV | Oracle Best EV | Net Uplift | Regret | Ranking |
+| Scenario | Baseline EV | Policy EV | Oracle Best EV | Net Uplift | Regret | Ranking |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: |
 | **Economic - baseline** | ₹1,671.74 | **₹2,353.54** | ₹2,356.66 | +₹681.80 | ₹3.12 | STABLE |
 | Economic - low value (0.5x) | ₹841.64 | **₹1,128.78** | ₹1,130.52 | +₹287.14 | ₹1.74 | STABLE |
@@ -192,7 +196,7 @@ Task 12 re-scores the **frozen** policy across 6 economic perturbations, 3 groun
 | **Shift - payment mix (70% UPI)** | ₹1,659.93 | **₹2,359.09** | ₹2,362.06 | +₹699.17 | ₹2.96 | STABLE |
 | **Shift - combined** | ₹3,894.14 | **₹6,859.09** | ₹6,861.53 | +₹2,964.94 | ₹2.45 | STABLE |
 
-"Ranking" reports whether `Oracle >= O1 >= Baseline` actually held in that scenario - it is
+"Ranking" reports whether `Oracle >= Policy >= Baseline` actually held in that scenario - it is
 computed, not asserted.
 
 **On safety violations in this table.** Every scenario above constrains the policy to
@@ -204,7 +208,7 @@ results say otherwise and are reported as they stand: the deliberately unconstra
 distribution-shift scenarios measured violations against a stale pre-shift safe set, which hid
 1,277 real breaches under `SHIFT_FAILURE_MIX` (see `TASK_16D_SAFETY_ROBUSTNESS_CORRECTION.md`).
 
-**Ground-truth robustness** is the sharpest test here: it weakens or strengthens the hidden contextual interactions the model was trained to exploit, without retraining. O1's advantage shrinks when the structure it learned is halved (+₹501.30 vs +₹681.80) and grows when it is amplified - the policy tracks the environment rather than depending on one exact simulator parameterization.
+**Ground-truth robustness** is the sharpest test here: it weakens or strengthens the hidden contextual interactions the model was trained to exploit, without retraining. Payment Recovery's advantage shrinks when the structure it learned is halved (+₹501.30 vs +₹681.80) and grows when it is amplified - the policy tracks the environment rather than depending on one exact simulator parameterization.
 
 ---
 

@@ -1,7 +1,7 @@
-# O1 Technical Architecture & System Layering
+# Payment Recovery Technical Architecture & System Layering
 
-> **Razorpay Buildathon 2026 — Track 03: AI Revenue Recovery**  
-> **Project**: O1 — Payment Failure Economic Recovery Advisor  
+> **Built for Razorpay AI Buildathon 2026 — Track 03: AI Revenue Recovery**
+> **Project**: Payment Recovery
 
 ---
 

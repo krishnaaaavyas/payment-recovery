@@ -1,7 +1,7 @@
-# CONTRIBUTING & CODE REVIEW GUIDE — O1 ADVISOR
+# CONTRIBUTING & CODE REVIEW GUIDE — PAYMENT RECOVERY
 
 ## Project Scope
-This repository houses **O1 — Payment Failure Economic Recovery Advisor** built for **Razorpay Track 03 — AI Revenue Recovery**.
+This repository houses **Payment Recovery** built for **Razorpay Track 03 — AI Revenue Recovery**.
 
 ---
 

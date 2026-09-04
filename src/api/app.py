@@ -35,8 +35,8 @@ from src.agent.executor import SimulatedRecoveryExecutor
 from src.agent.audit import audit_store
 
 app = FastAPI(
-    title="O1 — Payment Failure Economic Recovery Advisor API",
-    description="Post-payment-failure economic decision service for Razorpay Track 03 (Synthetic Environment)",
+    title="Payment Recovery API",
+    description="Post-payment-failure economic decision service built for Razorpay Track 03 (Synthetic Environment)",
     version="1.0.0"
 )
 

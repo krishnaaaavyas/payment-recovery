@@ -1,7 +1,7 @@
-# O1 Technical Reviewer Demo Guide
+# Payment Recovery Technical Reviewer Demo Guide
 
-> **Razorpay Buildathon 2026 — Track 03: AI Revenue Recovery**  
-> **Project**: O1 — Payment Failure Economic Recovery Advisor  
+> **Built for Razorpay AI Buildathon 2026 — Track 03: AI Revenue Recovery**
+> **Project**: Payment Recovery
 
 ---
 

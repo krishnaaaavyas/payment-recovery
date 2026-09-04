@@ -53,21 +53,21 @@ export const Overview: React.FC<OverviewProps> = ({ onNavigateToQueue }) => {
     <div className="space-y-6">
 
       {/* Hero Welcome Banner */}
-      <div className="bg-slate-900 border border-slate-800 rounded-lg p-6 relative overflow-hidden">
+      <div className="bg-white border border-slate-200 rounded-lg p-6 shadow-sm relative overflow-hidden">
         <div className="max-w-3xl space-y-3">
-          <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-md bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-xs font-semibold">
-            <Zap className="h-3.5 w-3.5" /> Executive Summary
+          <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded bg-blue-50 border border-blue-200 text-blue-700 text-xs font-semibold">
+            <Zap className="h-3.5 w-3.5 text-blue-600" /> Executive Summary
           </div>
-          <h2 className="text-2xl font-bold text-slate-100 tracking-tight">
-            Payment Recovery Advisor
+          <h2 className="text-2xl font-bold text-slate-900 tracking-tight">
+            Payment Recovery
           </h2>
-          <p className="text-sm text-slate-300 leading-relaxed">
-            When a payment fails, <span className="font-semibold text-slate-100">O1</span> estimates recovery probability <span className="text-indigo-400 font-mono">P(rec|X,a)</span> and net Expected Economic Value <span className="text-indigo-400 font-mono">EV(a|X)</span> to select the optimal safe action, outperforming deterministic decline-code policies while enforcing hard safety constraints.
+          <p className="text-sm text-slate-600 leading-relaxed">
+            When a payment fails, <span className="font-semibold text-slate-900">Payment Recovery</span> evaluates the available recovery options, checks them against safety rules, and recommends the action with the best expected recovery value.
           </p>
           <div className="pt-2 flex items-center gap-3">
             <button
               onClick={onNavigateToQueue}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold transition-colors"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold transition-colors shadow-sm"
             >
               <span>View Failed Payments</span>
               <ArrowRight className="h-4 w-4" />
@@ -80,47 +80,47 @@ export const Overview: React.FC<OverviewProps> = ({ onNavigateToQueue }) => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
 
         {/* Card 1: Revenue at Risk */}
-        <div className="bg-slate-900 border border-slate-800 rounded-lg p-4 space-y-2">
-          <div className="flex items-center justify-between text-xs font-medium text-slate-400">
+        <div className="bg-white border border-slate-200 rounded-lg p-4 shadow-sm space-y-2">
+          <div className="flex items-center justify-between text-xs font-medium text-slate-500">
             <span>Evaluated Volume</span>
-            <Info className="h-3.5 w-3.5 text-slate-500" />
+            <Info className="h-3.5 w-3.5 text-slate-400" />
           </div>
-          <div className="text-2xl font-bold text-slate-100 font-mono">
+          <div className="text-2xl font-bold text-slate-900 font-mono">
             {(direct?.events_evaluated ?? t11?.test_events_count ?? 0).toLocaleString()} Events
           </div>
-          <p className="text-xs text-slate-400">Chronological held-out test split</p>
+          <p className="text-xs text-slate-500">Chronological held-out test split</p>
         </div>
 
         {/* Card 2: Baseline Expected Value */}
-        <div className="bg-slate-900 border border-slate-800 rounded-lg p-4 space-y-2">
-          <div className="flex items-center justify-between text-xs font-medium text-slate-400">
+        <div className="bg-white border border-slate-200 rounded-lg p-4 shadow-sm space-y-2">
+          <div className="flex items-center justify-between text-xs font-medium text-slate-500">
             <span>Baseline Policy EV</span>
-            <span className="text-amber-400 font-medium">Deterministic</span>
+            <span className="text-amber-700 font-semibold">Deterministic</span>
           </div>
-          <div className="text-2xl font-bold text-slate-100 font-mono">{inr(direct?.direct_true_baseline_policy_ev_inr)}</div>
-          <p className="text-xs text-slate-400">Decline-code rules, direct simulator</p>
+          <div className="text-2xl font-bold text-slate-900 font-mono">{inr(direct?.direct_true_baseline_policy_ev_inr)}</div>
+          <p className="text-xs text-slate-500">Decline-code rules, direct simulator</p>
         </div>
 
         {/* Card 3: O1 Policy Expected Value */}
-        <div className="bg-slate-900 border border-slate-800 rounded-lg p-4 space-y-2">
-          <div className="flex items-center justify-between text-xs font-medium text-indigo-300">
+        <div className="bg-white border border-slate-200 rounded-lg p-4 shadow-sm space-y-2">
+          <div className="flex items-center justify-between text-xs font-medium text-blue-700">
             <span>Expected Economic Value</span>
-            <span className="text-emerald-400 font-bold">Optimal Safe</span>
+            <span className="text-emerald-700 font-bold">Optimal Safe</span>
           </div>
-          <div className="text-2xl font-bold text-emerald-400 font-mono">{inr(direct?.direct_true_o1_policy_ev_inr)}</div>
-          <p className="text-xs text-slate-300">Direct ground-truth simulator, full population</p>
+          <div className="text-2xl font-bold text-emerald-600 font-mono">{inr(direct?.direct_true_o1_policy_ev_inr)}</div>
+          <p className="text-xs text-slate-500">Direct ground-truth simulator, full population</p>
         </div>
 
         {/* Card 4: Economic Gain / Uplift */}
-        <div className="bg-slate-900 border border-slate-800 rounded-lg p-4 space-y-2">
-          <div className="flex items-center justify-between text-xs font-medium text-slate-400">
+        <div className="bg-white border border-slate-200 rounded-lg p-4 shadow-sm space-y-2">
+          <div className="flex items-center justify-between text-xs font-medium text-slate-500">
             <span>Net Economic Uplift</span>
-            <TrendingUp className="h-4 w-4 text-emerald-400" />
+            <TrendingUp className="h-4 w-4 text-emerald-600" />
           </div>
-          <div className="text-2xl font-bold text-emerald-400 font-mono">
+          <div className="text-2xl font-bold text-emerald-600 font-mono">
             +{direct?.direct_uplift_over_baseline_pct?.toFixed(2) ?? '-'}%
           </div>
-          <p className="text-xs text-emerald-400 font-medium">
+          <p className="text-xs text-emerald-700 font-semibold">
             +{inr(direct?.direct_uplift_over_baseline_inr_per_event)} / event vs baseline
           </p>
         </div>
@@ -131,18 +131,18 @@ export const Overview: React.FC<OverviewProps> = ({ onNavigateToQueue }) => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
         {/* Safety Gate Ablation Highlight */}
-        <div className="bg-slate-900 border border-slate-800 rounded-lg p-5 space-y-4">
+        <div className="bg-white border border-slate-200 rounded-lg p-5 shadow-sm space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <ShieldCheck className="h-5 w-5 text-emerald-400" />
-              <h3 className="text-sm font-semibold text-slate-100">Safety checks</h3>
+              <ShieldCheck className="h-5 w-5 text-emerald-600" />
+              <h3 className="text-sm font-bold text-slate-900">Safety checks</h3>
             </div>
-            <span className="px-2 py-0.5 rounded text-xs font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+            <span className="px-2 py-0.5 rounded text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
               {safety?.safety_violations_count ?? 0} Violations
             </span>
           </div>
 
-          <p className="text-xs text-slate-300 leading-relaxed">
+          <p className="text-xs text-slate-600 leading-relaxed">
             Safety checks enforce hard domain constraints before economic optimization, preventing invalid interventions such as asking users to update card details during bank downtime.
           </p>
 
@@ -152,50 +152,50 @@ export const Overview: React.FC<OverviewProps> = ({ onNavigateToQueue }) => {
             {/* Full Architecture */}
             <div className="space-y-1.5">
               <div className="flex items-center justify-between text-xs">
-                <span className="font-medium text-slate-200 flex items-center gap-1.5">
-                  <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" /> Decision process (With safety checks)
+                <span className="font-semibold text-slate-800 flex items-center gap-1.5">
+                  <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" /> Decision process (With safety checks)
                 </span>
-                <span className="font-mono font-bold text-emerald-400">
+                <span className="font-mono font-bold text-emerald-700">
                   {((safety?.safety_violation_rate ?? 0) * 100).toFixed(2)}% Safety Violations ({safety?.safety_violations_count ?? 0} events)
                 </span>
               </div>
-              <div className="w-full h-2.5 bg-slate-800 rounded-full overflow-hidden">
-                <div className="h-full bg-emerald-500 rounded-full w-full" />
+              <div className="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden border border-slate-200">
+                <div className="h-full bg-emerald-600 rounded-full w-full" />
               </div>
             </div>
 
             {/* Without Safety Gate */}
             <div className="space-y-1.5">
               <div className="flex items-center justify-between text-xs">
-                <span className="font-medium text-slate-300 flex items-center gap-1.5">
-                  <AlertTriangle className="h-3.5 w-3.5 text-rose-400" /> Without safety checks
+                <span className="font-semibold text-slate-700 flex items-center gap-1.5">
+                  <AlertTriangle className="h-3.5 w-3.5 text-rose-600" /> Without safety checks
                 </span>
-                <span className="font-mono font-bold text-rose-400">
+                <span className="font-mono font-bold text-rose-700">
                   {a3Rate !== undefined ? a3Rate.toFixed(2) : '-'}% Violations ({a3?.safety_violations_count?.toLocaleString() ?? '-'} events)
                 </span>
               </div>
-              <div className="w-full h-2.5 bg-slate-800 rounded-full overflow-hidden">
-                <div className="h-full bg-rose-500 rounded-full" style={{ width: `${a3Rate ?? 0}%` }} />
+              <div className="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden border border-slate-200">
+                <div className="h-full bg-rose-600 rounded-full" style={{ width: `${a3Rate ?? 0}%` }} />
               </div>
             </div>
 
           </div>
 
-          <div className="p-3 rounded bg-rose-500/5 border border-rose-500/10 text-xs text-slate-400 leading-relaxed">
-            <span className="font-semibold text-rose-300">Finding:</span> Without safety checks,
+          <div className="p-3 rounded bg-rose-50 border border-rose-200 text-xs text-rose-800 leading-relaxed">
+            <span className="font-semibold text-rose-900">Finding:</span> Without safety checks,
             unconstrained EV maximization breaches domain action constraints on{' '}
             {a3Rate !== undefined ? a3Rate.toFixed(2) : '-'}% of episodes due to action-space extrapolation.
           </div>
         </div>
 
         {/* Action Share Distribution */}
-        <div className="bg-slate-900 border border-slate-800 rounded-lg p-5 space-y-4">
+        <div className="bg-white border border-slate-200 rounded-lg p-5 shadow-sm space-y-4">
           <div className="flex items-center justify-between">
-            <h3 className="text-sm font-semibold text-slate-100">Recommended actions</h3>
-            <span className="text-xs text-slate-400">From /reports/summary</span>
+            <h3 className="text-sm font-bold text-slate-900">Recommended actions</h3>
+            <span className="text-xs text-slate-500">From /reports/summary</span>
           </div>
 
-          <p className="text-xs text-slate-300">
+          <p className="text-xs text-slate-600">
             Action selection share across {(direct?.events_evaluated ?? 0).toLocaleString()} held-out test episodes:
           </p>
 
@@ -203,13 +203,13 @@ export const Overview: React.FC<OverviewProps> = ({ onNavigateToQueue }) => {
             {actionDistribution.map((item) => (
               <div key={item.action} className="space-y-1">
                 <div className="flex items-center justify-between text-xs">
-                  <span className="font-medium text-slate-200">{item.label}</span>
+                  <span className="font-semibold text-slate-800">{item.label}</span>
                   <div className="flex items-center gap-2">
-                    <span className="text-slate-400 text-[11px]">{item.desc}</span>
-                    <span className="font-mono font-bold text-slate-100">{item.percentage.toFixed(2)}%</span>
+                    <span className="text-slate-500 text-[11px]">{item.desc}</span>
+                    <span className="font-mono font-bold text-slate-900">{item.percentage.toFixed(2)}%</span>
                   </div>
                 </div>
-                <div className="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
+                <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden border border-slate-200">
                   <div className={`h-full ${item.color} rounded-full`} style={{ width: `${item.percentage}%` }} />
                 </div>
               </div>
@@ -220,10 +220,10 @@ export const Overview: React.FC<OverviewProps> = ({ onNavigateToQueue }) => {
       </div>
 
       {/* Persistent Synthetic Data Disclaimer Footer */}
-      <div className="p-4 rounded-lg bg-slate-900 border border-slate-800 flex items-start gap-3">
-        <Info className="h-4 w-4 text-amber-400 shrink-0 mt-0.5" />
-        <div className="text-xs text-slate-400 leading-relaxed">
-          <span className="font-semibold text-amber-300">Evaluation environment:</span> This demo uses synthetic payment events. Metrics shown here do not represent Razorpay production performance, real customer recovery rates, or real money movement.
+      <div className="p-4 rounded-lg bg-amber-50 border border-amber-200 flex items-start gap-3">
+        <Info className="h-4 w-4 text-amber-700 shrink-0 mt-0.5" />
+        <div className="text-xs text-amber-900 leading-relaxed">
+          <span className="font-semibold text-amber-950">Evaluation environment:</span> This demo uses synthetic payment events. Metrics shown here do not represent Razorpay production performance, real customer recovery rates, or real money movement.
         </div>
       </div>
 

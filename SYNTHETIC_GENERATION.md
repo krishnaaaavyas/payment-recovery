@@ -1,7 +1,7 @@
 # SYNTHETIC DATASET GENERATION ARCHITECTURE & REPRODUCIBILITY GUIDE
 
 ## Overview
-This document details the data-generating process, mathematical formulations, safety constraints, economic parameters, and anti-circularity safeguards built into the synthetic dataset for **O1 — Payment Failure Economic Recovery Advisor**.
+This document details the data-generating process, mathematical formulations, safety constraints, economic parameters, and anti-circularity safeguards built into the synthetic dataset for **Payment Recovery** (Built for Razorpay AI Buildathon 2026 — Track 03: AI Revenue Recovery).
 
 ---
 

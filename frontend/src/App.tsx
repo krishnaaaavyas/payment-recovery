@@ -61,7 +61,7 @@ export const App: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-950 text-slate-100 font-sans antialiased">
+    <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900 font-sans antialiased">
 
       {/* Top Header */}
       <Header apiOnline={apiOnline} />
@@ -78,10 +78,10 @@ export const App: React.FC = () => {
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
 
         {!apiOnline && (
-          <div className="mb-6 p-4 rounded-lg bg-rose-500/10 border border-rose-500/20 text-xs text-rose-300 flex items-center gap-3">
-            <AlertCircle className="h-5 w-5 text-rose-400 shrink-0" />
+          <div className="mb-6 p-4 rounded bg-rose-50 border border-rose-200 text-xs text-rose-800 flex items-center gap-3">
+            <AlertCircle className="h-5 w-5 text-rose-600 shrink-0" />
             <div>
-              <span className="font-bold">FastAPI Backend Server Offline:</span> Ensure the backend service is running locally on <code className="font-mono text-rose-200">http://localhost:8000</code> (<code className="font-mono text-rose-200">uvicorn src.api.app:app --reload</code>).
+              <span className="font-bold">FastAPI Backend Server Offline:</span> Ensure the backend service is running locally on <code className="font-mono text-rose-900 font-semibold">http://localhost:8000</code> (<code className="font-mono text-rose-900 font-semibold">uvicorn src.api.app:app --reload</code>).
             </div>
           </div>
         )}
@@ -120,8 +120,8 @@ export const App: React.FC = () => {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-slate-900 bg-slate-950 py-4 text-center text-xs text-slate-500">
-        O1 — Payment Failure Economic Recovery Advisor | Razorpay Buildathon 2026 Track 03 (Synthetic Evaluation Data)
+      <footer className="border-t border-slate-200 bg-white py-4 text-center text-xs text-slate-500">
+        Payment Recovery | Built for Razorpay AI Buildathon 2026 — Track 03 (TIER C — Synthetic Evaluation Data)
       </footer>
 
     </div>

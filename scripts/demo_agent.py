@@ -22,7 +22,7 @@ from src.agent.audit import audit_store
 
 def main():
     print("==========================================================")
-    print("  O1 BOUNDED RECOVERY ADVISOR — END-TO-END DEMO SCRIPT   ")
+    print("  PAYMENT RECOVERY — END-TO-END DEMO SCRIPT   ")
     print("==========================================================\n")
 
     # 1. Ingest a sample failed payment event episode

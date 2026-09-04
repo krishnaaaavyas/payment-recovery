@@ -1,15 +1,15 @@
-# O1 Pitch Slide Deck Layout (8 Slides)
+# Payment Recovery Pitch Slide Deck Layout (8 Slides)
 
-> **Razorpay Buildathon 2026 — Track 03: AI Revenue Recovery**  
-> **Project**: O1 — Payment Failure Economic Recovery Advisor  
+> **Built for Razorpay AI Buildathon 2026 — Track 03: AI Revenue Recovery**
+> **Project**: Payment Recovery
 
 ---
 
 ## Slide 1: Title Slide
-- **Headline**: O1 — Payment Failure Economic Recovery Advisor
-- **Subtitle**: Turning Payment Failures into Bounded Economic Decisions
-- **Metadata**: Razorpay Buildathon 2026 | Track 03 — AI Revenue Recovery
-- **Key Visual**: O1 Decision Loop Icon ($\text{Predict} \rightarrow \text{Value} \rightarrow \text{Constrain} \rightarrow \text{Decide}$)
+- **Headline**: Payment Recovery
+- **Subtitle**: Recover failed payments with safer, smarter decisions.
+- **Metadata**: Built for Razorpay AI Buildathon 2026 | Track 03 — AI Revenue Recovery
+- **Key Visual**: Payment Recovery Decision Loop ($\text{Predict} \rightarrow \text{Value} \rightarrow \text{Constrain} \rightarrow \text{Decide}$)
 
 ---
 
@@ -67,7 +67,7 @@
 - **Headline**: Off-Policy SNIPS Benchmark & Oracle Regret
 - **Key Metrics Table**:
   - **Baseline EV (direct simulator)**: ₹1,671.74 / event
-  - **O1 Economic Policy EV**: **₹2,353.54 / event** (+40.78% / +₹681.80 per event)
+  - **Payment Recovery Policy EV**: **₹2,353.54 / event** (+40.78% / +₹681.80 per event)
   - **Oracle Best Achievable EV**: ₹2,356.66 / event
   - **Oracle Regret**: **₹3.12 / event** (99.87% of the oracle ceiling)
 - **Robustness**: Performance ranking stable across 6 economic perturbations and 3 distribution shifts.
