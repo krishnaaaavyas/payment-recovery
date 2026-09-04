@@ -228,7 +228,9 @@ The React 18 + TypeScript 5 + Vite 5 frontend console provides:
 ### 1. Requirements & Dependencies
 - Python 3.11+
 - Node.js v18+ / v22+
-- Dependencies listed in `requirements.txt` and `frontend/package.json`
+- Dependencies:
+  - `requirements.txt`: General dependency specification with flexible version bounds.
+  - `requirements-lock.txt`: Pinned environment intended for exact/byte-level reproducibility and SHA-256 checksum verification against `data/synthetic/checksums.json`. Install with `pip install -r requirements-lock.txt`.
 
 ### 2. Generate the dataset and train the model
 
@@ -331,5 +333,5 @@ Razorpay/
 │   ├── models/                        # RecoveryPredictor & preprocessing
 │   └── policy/                        # PolicyAdvisor & Baseline policy
 ├── requirements-lock.txt              # Exact verified dependency versions
-└── tests/                             # 83 unit tests across 9 test suites
+└── tests/                             # 98 unit tests (156 subtests) passed
 ```

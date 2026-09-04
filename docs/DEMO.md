@@ -7,7 +7,7 @@
 
 ## 1. Local Environment Prerequisites
 
-Ensure **Python 3.11+** and **Node.js v18+ / v22+** are installed.
+Ensure **Python 3.11+** and **Node.js v18+ / v22+** are installed. (For exact byte-level reproducibility and dataset checksum verification, install pinned dependencies via `pip install -r requirements-lock.txt`).
 
 ### Terminal 1: Launch FastAPI Backend Service
 ```bash
