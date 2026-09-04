@@ -2,7 +2,7 @@
 
 **Track 03 — AI Revenue Recovery**
 **Razorpay Buildathon 2026 Submission Package**
-**Public Repository:** [https://github.com/krishnaaaavyas/razorpay-payment-recovery-advisor](https://github.com/krishnaaaavyas/razorpay-payment-recovery-advisor)
+**Public Repository:** [https://github.com/krishnaaaavyas/payment-recovery](https://github.com/krishnaaaavyas/payment-recovery)
 
 ---
 
@@ -336,7 +336,7 @@ Payment Recovery demonstrates that payment failure recovery should not be approa
 
 ## 21. IMPORTANT LINKS & REFERENCES
 
-- **Public GitHub Repository:** [https://github.com/krishnaaaavyas/razorpay-payment-recovery-advisor](https://github.com/krishnaaaavyas/razorpay-payment-recovery-advisor)
+- **Public GitHub Repository:** [https://github.com/krishnaaaavyas/payment-recovery](https://github.com/krishnaaaavyas/payment-recovery)
 - **Project Documentation & References:**
   - [`../README.md`](../README.md) — Project Overview & Quick Start
   - [`DEMO.md`](DEMO.md) — Complete Demonstration Guide
